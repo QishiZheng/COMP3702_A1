@@ -1,6 +1,8 @@
 package solver;
 
 import problem.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +64,28 @@ public class State {
     }
 
     /**
+     * TODO: TO BE IMPLEMENTED
+     * Get the cost from current state to given state s
+     * @param s given goal state
+     * @return cost cost from current state to given state s
+     */
+    public double costToState(State s) {
+        return 0;
+    }
+
+    /**
+     * TODO: TO BE IMPLEMENTED
+     * Get all state that this state can reach
+     * @return all neighbours of this state
+     */
+    public List<State> getNeighbour() {
+        List<State> neighbours = new ArrayList<State>();
+
+        return neighbours;
+    }
+
+
+    /**
      *
      * @param state state for comparison
      * @return true if the given state equals to this state, false otherwise
@@ -82,6 +106,21 @@ public class State {
         }
 
         return false;
+    }
+
+
+
+    /**
+     * TODO: TO BE IMPLEMENTED
+     * An estimation of cost from current state to s.
+     * The heuristic could be the Euclidean distance between the position at current state
+     * and the position at goal sate
+     * @param s goal state
+     * @return estimation.
+     */
+    public double heuristic(State s) {
+
+        return 0.0;
     }
 
 
