@@ -1,7 +1,10 @@
 package solver;
 
-import java.util.HashSet;
-import java.util.Set;
+import problem.ProblemSpec;
+
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * A graph data structure that stores nodes of state
@@ -9,8 +12,8 @@ import java.util.Set;
 public class StateGraph {
     private Vertex root;
     private Vertex goal;
-    private Set<Vertex> vertices;
-    private Set<Edge> edges;
+    private List<Vertex> vertices;
+    private List<Edge> edges;
 
     /**
      * Construct the state graph with root and goal vertices/states
@@ -20,13 +23,13 @@ public class StateGraph {
     public StateGraph(Vertex root, Vertex goal) {
         this.root = root;
         this.goal = goal;
-        vertices = new HashSet<Vertex>();
-        edges = new HashSet<Edge>();
+        vertices = new ArrayList<Vertex>();
+        edges = new ArrayList<Edge>();
     }
 
     public StateGraph() {
-        vertices = new HashSet<Vertex>();
-        edges = new HashSet<Edge>();
+        vertices = new ArrayList<Vertex>();
+        edges = new ArrayList<Edge>();
     }
 
     /**
@@ -90,8 +93,9 @@ public class StateGraph {
         if (!this.hasEdge(e)) {
             this.edges.add(e);
             e.getStart().addNeighbor(e);
-            Edge endNeighbor = new Edge(e.getEnd(), e.getStart(), e.getCost());
-            e.getEnd().addNeighbor(endNeighbor);
+//            Edge endNeighbor = new Edge(e.getEnd(), e.getStart(), e.getCost());
+//            e.getEnd().addNeighbor(endNeighbor);
+            e.getEnd().addNeighbor(e);
             return true;
         }
         return false;
@@ -107,8 +111,9 @@ public class StateGraph {
         if (this.hasEdge(e)) {
             this.edges.remove(e);
             e.getStart().removeNeighbor(e);
-            Edge endNeighbor = new Edge(e.getEnd(), e.getStart(), e.getCost());
-            e.getEnd().addNeighbor(endNeighbor);
+//            Edge endNeighbor = new Edge(e.getEnd(), e.getStart(), e.getCost());
+//            e.getEnd().removeNeighbor(endNeighbor);
+            e.getEnd().removeNeighbor(e);
             return true;
         }
         return false;
@@ -122,9 +127,9 @@ public class StateGraph {
     public boolean hasVertex(Vertex v) { return this.vertices.contains(v); }
 
     /**
-     * Check if the graph contains given edge
+     * Check if the graph contains given edge and the two vertices in the edge
      * @param e given edge
-     * @return true if this graph contains e
+     * @return true if this graph contains e and the two vertices in the edge
      */
     public boolean hasEdge(Edge e) {
         if ((this.hasVertex(e.getStart())) && (this.hasVertex(e.getEnd()))) {
@@ -149,4 +154,26 @@ public class StateGraph {
      */
     public int getNumOfVertex() { return this.vertices.size(); }
 
+
+//    public static void main(String[] args) {
+//        ProblemSpec ps = new ProblemSpec();
+//        ProblemSpec ps2 = new ProblemSpec();
+//        try {
+//            ps.loadProblem("input1.txt");
+//            ps2.loadProblem("input2.txt");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        StateGraph sg = new StateGraph();
+//        Vertex v1 = new Vertex(ps);
+//        Vertex v2 = new Vertex(ps2);
+//        sg.addVertex(v1);
+//        sg.addVertex(v2);
+//        Edge e1 = new Edge(v1, v2);
+//        Edge e2 = new Edge(v2, v1);
+//        sg.addEdge(e2);
+//        System.out.println("Has Edge e1: " + sg.hasEdge(e1));
+//        System.out.println("v1 has: " + Arrays.toString(v1.getNeighbors().toArray()));
+//        System.out.println(sg.getNumOfVertex());
+//    }
 }

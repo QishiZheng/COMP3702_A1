@@ -54,14 +54,25 @@ public class Edge {
      * @param obj given object
      * @return true if it is equal
      */
+    @Override
     public boolean equals(Object obj) {
         if(obj instanceof Edge) {
             Edge edge = (Edge) obj;
-            if(this.start.equals(edge.getStart())
-                    && this.end.equals(((Edge) obj).getEnd())) {
+            if((this.start.equals(edge.getStart()) && this.end.equals((edge.getEnd()))) ||
+                    (this.start.equals((edge.getEnd())) && this.end.equals(edge.getStart()))) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return (this.start.hashCode() + this.end.hashCode()) * 32;
+    }
+
+    @Override
+    public String toString() {
+        return "Edge from " + this.start + " to " + this.end + "\n";
     }
 }

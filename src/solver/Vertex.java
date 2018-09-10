@@ -1,7 +1,9 @@
 package solver;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+
+import java.util.List;
+
 
 /**
  * Node class for StateGraph
@@ -10,11 +12,11 @@ import java.util.Set;
 public class Vertex<State> {
     private State state;
     //all edges that connected to this vertex
-    private Set<Edge> neighbors;
+    private List<Edge> neighbors;
 
     public Vertex(State s) {
         this.state = s;
-        this.neighbors = new HashSet<Edge>();
+        this.neighbors = new ArrayList<Edge>();
     }
 
     /**
@@ -29,8 +31,8 @@ public class Vertex<State> {
      *
      * @return a set of all neighbor edges that this vertex connected to
      */
-    public Set getNeighbors() {
-        return new HashSet<Edge>(this.neighbors);
+    public List getNeighbors() {
+        return new ArrayList<Edge>(this.neighbors);
     }
 
     /**
@@ -78,6 +80,7 @@ public class Vertex<State> {
      * @param obj given object
      * @return true if equal
      */
+    @Override
     public boolean equals(Object obj) {
         if(obj instanceof Vertex) {
            Vertex n = (Vertex) obj;
@@ -88,5 +91,9 @@ public class Vertex<State> {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        return this.state.hashCode()*32;
+    }
 
 }
