@@ -11,10 +11,31 @@ package solver;
 public class SearchTreeNode implements Comparable<SearchTreeNode> {
 
     private SearchTreeNode parent;
-    private double cost;
+//    private StateCostPair stateCostPair;
+    private double pathCost = 0;
+    private int depth = 0;
 
     //TODO: A HELL LOT NEED TO BE DONE HERE
 
+//    public SearchTreeNode(StateCostPair stateCostPair) {
+//        this.parent = null;
+//        this.stateCostPair = stateCostPair;
+//    }
+//
+//    public SearchTreeNode(SearchTreeNode parent, StateCostPair stateCostPair) {
+//        this.parent = parent;
+//        this.stateCostPair = stateCostPair;
+//        this.pathCost = parent.getPathCost() + stateCostPair.getCost();
+//        this.depth = parent.getDepth() + 1;
+//    }
+
+    public double getPathCost() {
+        return pathCost;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
 
 
     /**
@@ -29,7 +50,7 @@ public class SearchTreeNode implements Comparable<SearchTreeNode> {
      *          1 if this node has a greater total path cost than node s
      */
     public int compareTo(SearchTreeNode s) {
-        return Double.compare(this.cost, s.cost);
+        return Double.compare(this.getPathCost(), s.getPathCost());
     }
 }
 
