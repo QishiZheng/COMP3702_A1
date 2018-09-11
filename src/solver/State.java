@@ -78,11 +78,11 @@ public class State {
      * Get all state that this state can reach
      * @return all neighbours of this state
      */
-    public List<State> getNeighbour() {
-        List<State> neighbours = new ArrayList<State>();
-
-        return neighbours;
-    }
+//    public List<State> getNeighbour() {
+//        List<State> neighbours = new ArrayList<State>();
+//
+//        return neighbours;
+//    }
 
 
     /**

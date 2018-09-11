@@ -4,6 +4,9 @@ package solver;
  * A generic search tree node representing a path through a state graph. Stores
  * a state, the cost of the last edge followed, and the total cost of all edges
  * in the path associated with this node.
+ *************************************************************************
+ * This is for A* search algorithm and maybe RRT
+ * **********************************************************************
  */
 public class SearchTreeNode implements Comparable<SearchTreeNode> {
 
