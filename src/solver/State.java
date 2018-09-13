@@ -17,6 +17,8 @@ public class State {
     private List<Box> boxState;
     //state of moving obstacles
     private List<Box> movingObstState;
+    //state of static obstacles
+    private List<StaticObstacle> staticObstState;
 
 
     private ProblemSpec problemSpec;
@@ -33,6 +35,7 @@ public class State {
         this.robotState = ps.getInitialRobotConfig();
         this.boxState = ps.getMovingBoxes();
         this.movingObstState = ps.getMovingObstacles();
+        staticObstState = ps.getStaticObstacles();
     }
 
 
@@ -113,6 +116,12 @@ public class State {
         return ts.hasCollision(rc, movables);
 
     }
+
+
+     /** Get the static obstacles state
+     * @return a list of static obstacles
+     */
+    public List<StaticObstacle> getStaticObstSt() { return staticObstState; }
 
 
     /**
