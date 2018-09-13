@@ -7,8 +7,8 @@ import tester.Tester;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 
 /**
  * PRM algorithm for sampling configuration of the robot
@@ -58,22 +58,44 @@ public class PRM {
         //set goal vertex
         Vertex<RobotConfig> goalVertex = new Vertex<>(this.goal);
         //initialise teh stateGraph with init and goal vertex
-        StateGraph<RobotConfig> roadmap = new StateGraph<>(initVertex, goalVertex);
+        StateGraph<RobotConfig> roadmap = new StateGraph<RobotConfig>(initVertex, goalVertex);
 
         //sample n random robotConfig
         while(roadmap.numOfVertex() - 2 < this.n) {
             RobotConfig sample = randomRobotConfig();
             //check if this sample config collides with any obstacles,
-            //Add the sample to roadmap/graph if no collision
+            //Add the sample to roadMap/graph if no collision
             if(!(this.states.robotCollision(sample))) {
-                roadmap.addVertex(new Vertex<>(sample));
+                roadmap.addVertex(new Vertex<RobotConfig>(sample));
                 //System.out.println("POS: (" + sample.getPos().getX() + ", " + sample.getPos().getY() + ")\n");
             }
         }
 
         //System.out.println("SIZE: " + roadmap.numOfVertex() + "\n");
 
-        //TODO: Connect the vertices with edges
+        //TODO: Get the k nearest reachable neighbor vertices
+        for(Vertex<RobotConfig> vr1 : roadmap.getAllVertices()) {
+            RobotComparator comp = new RobotComparator();
+            comp.setRobot(vr1.getState());
+            //PriorityQueue for holding the k closest neighbor vertices
+            PriorityQueue<RobotConfig> pq = new PriorityQueue<>(k, comp);
+
+            //list of k neighbors
+            List<Vertex<RobotConfig>> neighbors = new ArrayList<Vertex<RobotConfig>();
+            for(Vertex<RobotConfig> vr2 : roadmap.getAllVertices()) {
+                //no need to set the vertex itself as its neighbor
+                if (vr2.getState().equals(vr1.getState())) { continue; }
+
+                //check if this neighbor is reachable
+
+            }
+
+        }
+
+
+        //TODO: Try to connect each vertex with their k nearest neighbors
+
+
 
         return roadmap;
     }
