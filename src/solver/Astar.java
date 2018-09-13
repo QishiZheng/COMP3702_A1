@@ -12,17 +12,13 @@ public class Astar  {
     private PriorityQueue<Vertex<State>> container;
     private int totNodes = 0;
     private StateGraph<RobotConfig> graph;
-    private Vertex<RobotConfig> initial;
-    private Vertex<RobotConfig> goal;
-    private HashSet<SearchTreeNode> visitedNodes = new HashSet<>();
+    private HashSet<Vertex<State>> visitedNodes = new HashSet<>();
     private HashSet<State> unexploredNodes = new HashSet<>();
     private List<State> path = new ArrayList<>();
 
-
     public Astar() {
         container = new PriorityQueue<>();
-        this.initial = graph.getRootVertex();
-        this.goal = graph.getGoalVertex();
+        this.graph = graph;
     }
 
     /**
@@ -30,13 +26,13 @@ public class Astar  {
      * @param graph the state graph to A* search in
      * @return the optimal path
      */
-    public List<State> search(StateGraph<RobotConfig> graph) {
+    public List<State> search(StateGraph<State> graph) {
         return search(graph.getRootVertex(), graph.getGoalVertex());
     }
 
-    public List<State> search(Vertex<RobotConfig> initial, Vertex<RobotConfig> goal) {
+    public List<State> search(Vertex<State> initial, Vertex<State> goal) {
         // null for now
-        Vertex<State> rootNode = new Vertex<State>(null);
+        Vertex<State> rootNode = new Vertex<>(initial.getState());
 
         // initialisations
         unexploredNodes.add(rootNode.getState());
@@ -52,37 +48,45 @@ public class Astar  {
                 return new ArrayList<>();
             }
 
+            // aStarNode.node is currentNode
+            AStarNode<State> aStarNode = new AStarNode<>(currentNode);
+
             totNodes--;
 
-            if (currentNode.getState().equals(goal.getState())) {
+            if (aStarNode.node.getState().equals(goal.getState())) {
+
                 // the path has been found! Calculate the distance
-                List<State> pathToGoal = new ArrayList<>();
-                pathToGoal = findPathFromNode(goal.);
+                List<State> pathToGoal = findPathFromNode(aStarNode);
 
-
-                while (graph != null) {
-                    //pathToGoal.add(currentNode.getStateCostPair());
-                    pathToGoal.add(currentNode.)
-                    currentNode = currentNode.getParent();
-                }
-                Collections.reverse(pathToGoal);
                 reset();
                 return pathToGoal;
             }
 
             // not the goal - add all successors to container
+            visitedNodes.add(aStarNode.node);
+            for (Edge node : aStarNode.node.getNeighbors()) {
+                totNodes++;
+
+                if (!visitedNodes.contains(aStarNode.node)) {
+                    // if this node hasn't bene visited, add it to the container
+                    container.add(aStarNode.node);
+                }
+            }
         }
-        return new ArrayList<>();
+
+        // no solution
+        reset();
+        return null;
     }
 
-    private List<State> findPathFromNode(Vertex<State> node) {
+    private List<State> findPathFromNode(AStarNode<State> node) {
         List<State> finalPath = new ArrayList<>();
         // add this node as the first element
-        finalPath.add(node.getState());
-        Vertex<State> parentNode = node.getParent();
+        finalPath.add(node.node.getState());
+        AStarNode<State> parentNode = node.parent;
         while (parentNode != null) {
-            finalPath.add(parentNode.getState());
-            parentNode = parentNode.getParent();
+            finalPath.add(parentNode.node.getState());
+            parentNode = parentNode.parent;
         }
 
         // reverse this list so that we get the parent -> child path
@@ -92,5 +96,23 @@ public class Astar  {
 
     public void reset() {
         container.clear();
+    }
+
+    public int totNodes() {
+        return totNodes;
+    }
+
+    private class AStarNode<T> {
+        Vertex<T> node;
+        AStarNode<T> parent;
+
+        AStarNode(Vertex<T> node) {
+            this.node = node;
+        }
+
+        void setParent(AStarNode<T> parent) {
+            this.parent = parent;
+        }
+
     }
 }
