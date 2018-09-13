@@ -13,6 +13,8 @@ public class Vertex<T> {
     private T state;
     //all edges that connected to this vertex
     private List<Edge> neighbors;
+    // this node's parent
+    private Vertex<T> parent;
 
     public Vertex(T s) {
         this.state = s;
@@ -73,6 +75,13 @@ public class Vertex<T> {
      * @return the number of edges that this vertex connected to
      */
     public int getNumOfNeighbors() { return this.neighbors.size(); }
+
+    /**
+     * @return returns the parent of this node
+     */
+    public Vertex<T> getParent() {
+        return this.parent;
+    }
 
     /**
      * Check if the given object is equal to this Vertex

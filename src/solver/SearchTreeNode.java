@@ -8,10 +8,9 @@ package solver;
  * This is for A* search algorithm and maybe RRT
  * **********************************************************************
  */
-public class SearchTreeNode implements Comparable<SearchTreeNode> {
+public class SearchTreeNode<T> implements Comparable<SearchTreeNode> {
 
-    private SearchTreeNode parent;
-//    private StateCostPair stateCostPair;
+    private SearchTreeNode<T> parent;
     private double pathCost = 0;
     private int depth = 0;
 
@@ -29,13 +28,13 @@ public class SearchTreeNode implements Comparable<SearchTreeNode> {
 //        this.depth = parent.getDepth() + 1;
 //    }
 
-    public SearchTreeNode getParent() {
+    public SearchTreeNode<T> getParent() {
         return parent;
     }
 
-    public StateCostPair getStateCostPair() {
+    /*public StateCostPair getStateCostPair() {
         return stateCostPair;
-    }
+    }*/
 
     public double getPathCost() {
         return pathCost;
