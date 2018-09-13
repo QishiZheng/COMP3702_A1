@@ -81,7 +81,7 @@ public class PRM {
             PriorityQueue<RobotConfig> pq = new PriorityQueue<>(k, comp);
 
             //list of k neighbors
-            List<Vertex<RobotConfig>> neighbors = new ArrayList<Vertex<RobotConfig>();
+            List<Vertex<RobotConfig>> neighbors = new ArrayList<Vertex<RobotConfig>>();
             for(Vertex<RobotConfig> vr2 : roadmap.getAllVertices()) {
                 //no need to set the vertex itself as its neighbor
                 if (vr2.getState().equals(vr1.getState())) { continue; }
