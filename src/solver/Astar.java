@@ -12,8 +12,6 @@ public class Astar  {
     private PriorityQueue<Vertex<State>> container = new PriorityQueue<>();
     private int totNodes = 0;
     private StateGraph<RobotConfig> graph;
-    private HashSet<AStarNode<State>> visitedNodes = new HashSet<>();
-    private List<State> path = new ArrayList<>();
 
     public Astar(StateGraph<RobotConfig> graph) {
         this.graph = graph;
@@ -36,6 +34,7 @@ public class Astar  {
 
         // initialisations
         container.add(rootNode);
+        List<AStarNode<State>> visitedNodes = new ArrayList<>();
 
 
         while (container.size() > 0) {
@@ -97,7 +96,6 @@ public class Astar  {
 
     public void reset() {
         container.clear();
-        visitedNodes.clear();
     }
 
     public int totNodes() {
