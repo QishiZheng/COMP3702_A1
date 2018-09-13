@@ -23,7 +23,7 @@ public abstract class Box {
 	}
 	/**
 	 * Constructs an obstacle with the given (x,y) coordinates of the
-	 * bottom-left corner, as well as the width and height.
+	 * top-left corner, as well as the width and height.
 	 * 
 	 * @param x
 	 *            the minimum x-value.
@@ -40,7 +40,7 @@ public abstract class Box {
 
 	/**
 	 * Constructs a square box at a position width a side width
-	 * bottom-left corner, as well as the width and height.
+	 * top-left corner, as well as the width and height.
 	 * 
 	 * @param pos
 	 *            the position of the box
@@ -72,6 +72,10 @@ public abstract class Box {
 	 */
 	public Rectangle2D getRect() {
 		return (Rectangle2D) rect.clone();
+	}
+
+	public void setRect(Point2D point) {
+		rect.setRect(point.getX(), point.getY(), width, width);
 	}
 
 	/**
