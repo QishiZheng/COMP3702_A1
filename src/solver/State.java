@@ -15,6 +15,8 @@ public class State {
     private List<Box> boxState;
     //state of moving obstacles
     private List<Box> movingObstState;
+    //state of static obstacles
+    private List<StaticObstacle> staticObstState;
 
 
     /**
@@ -25,6 +27,7 @@ public class State {
         this.robotState = ps.getInitialRobotConfig();
         this.boxState = ps.getMovingBoxes();
         this.movingObstState = ps.getMovingObstacles();
+        staticObstState = ps.getStaticObstacles();
     }
 
     /**
@@ -62,6 +65,12 @@ public class State {
     public List<Box> getMovingObst() {
         return this.movingObstState;
     }
+
+    /**
+     * Get the static obstacles state
+     * @return a list of static obstacles
+     */
+    public List<StaticObstacle> getStaticObstSt() { return staticObstState; }
 
     /**
      * TODO: TO BE IMPLEMENTED
