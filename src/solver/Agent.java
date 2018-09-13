@@ -1,14 +1,12 @@
 package solver;
 
-import problem.ProblemSpec;
+import java.util.List;
 
 /**
  * The search agent
  */
-public class Agent {
-    private ProblemSpec ps;
+public interface Agent {
 
-    public void agent(ProblemSpec problem) {
-        ps = problem;
-    }
+    public List<StateCostPair> search(State initial, State goal);
+
 }

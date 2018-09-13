@@ -26,6 +26,14 @@ public class SearchTreeNode implements Comparable<SearchTreeNode> {
         this.depth = parent.getDepth() + 1;
     }
 
+    public SearchTreeNode getParent() {
+        return parent;
+    }
+
+    public StateCostPair getStateCostPair() {
+        return stateCostPair;
+    }
+
     public double getPathCost() {
         return pathCost;
     }
