@@ -41,6 +41,7 @@ public class RRT {
 
         // Remove currBox from moveableObstacle
         moveableObstacle.remove(this.currBox);
+        this.setNodePath();
     }
 
     // Methods //
@@ -129,6 +130,10 @@ public class RRT {
         // if this code is reached, it means allNode size is more than
         // the MAX_NODE number
         return null;
+    }
+
+    public LinkedList<Node> getNodePath() {
+        return nodePath;
     }
 
 
