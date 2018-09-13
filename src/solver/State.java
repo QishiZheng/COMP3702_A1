@@ -1,7 +1,9 @@
 package solver;
 
 import problem.*;
+import tester.Tester;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,15 +19,22 @@ public class State {
     private List<Box> movingObstState;
 
 
+    private ProblemSpec problemSpec;
+
+
+
+
     /**
      * Constructs a state from a ProblemSpec
      * @param ps Given ProblemSpec for constructing state
      */
     public State(ProblemSpec ps) {
+        this.problemSpec = ps;
         this.robotState = ps.getInitialRobotConfig();
         this.boxState = ps.getMovingBoxes();
         this.movingObstState = ps.getMovingObstacles();
     }
+
 
     /**
      * Constructs a state with RobotConfig, List of boxes and List of movingObstacles
@@ -62,6 +71,49 @@ public class State {
     public List<Box> getMovingObst() {
         return this.movingObstState;
     }
+
+    /**
+     * Get the first point of the robot
+     * @param r the robot
+     * @param ps the problem spec that this robot config is from
+     * @return A Point2D representing the first point.
+     */
+    public Point2D getPoint2(RobotConfig r, ProblemSpec ps) {
+        double x = r.getPos().getX() + Math.cos(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        double y = r.getPos().getY() + Math.sin(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        return new Point2D.Double(x,y);
+    }
+    /**
+     * Get the second point of the robot
+     * @param r the robot
+     * @param ps the problem spec that this robot config is from
+     * @return A Point2D representing the second point.
+     */
+    public Point2D getPoint1(RobotConfig r, ProblemSpec ps) {
+        double x = r.getPos().getX() - Math.cos(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        double y = r.getPos().getY() - Math.sin(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        return new Point2D.Double(x,y);
+    }
+
+
+    /**
+     * Check if given robot config has collision with all of the movable objects
+     * in this problem spec
+     * @param rc robot config
+     * @return true if has collision
+     *
+     */
+    public boolean robotCollision(RobotConfig rc) {
+        Tester ts = new Tester(problemSpec);
+
+        List<Box> movables = new ArrayList<>();
+        movables.addAll(this.getBoxes());
+        movables.addAll(this.getMovingObst());
+        System.out.println("Size of Obs: " + movables.size() + "\n");
+        return ts.hasCollision(rc, movables);
+
+    }
+
 
     /**
      * TODO: TO BE IMPLEMENTED

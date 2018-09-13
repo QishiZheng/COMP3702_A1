@@ -15,7 +15,8 @@ public class StateGraph<T> {
     private List<Edge<T>> edges;
 
     /**
-     * Construct the state graph with root and goal vertices/states
+     * Construct the state graph with root and goal vertices/states,
+     * add root and goal vertices to the graph
      * @param root
      * @param goal
      */
@@ -24,6 +25,9 @@ public class StateGraph<T> {
         this.goal = goal;
         vertices = new ArrayList<Vertex<T>>();
         edges = new ArrayList<Edge<T>>();
+
+        vertices.add(root);
+        vertices.add(goal);
     }
 
     public StateGraph() {
@@ -151,7 +155,7 @@ public class StateGraph<T> {
      *
      * @return the number of vertices in this graph
      */
-    public int getNumOfVertex() { return this.vertices.size(); }
+    public int numOfVertex() { return this.vertices.size(); }
 
 
 //    public static void main(String[] args) {
