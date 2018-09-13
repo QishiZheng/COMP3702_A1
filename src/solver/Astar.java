@@ -9,15 +9,13 @@ import java.util.*;
  */
 public class Astar  {
 
-    private PriorityQueue<Vertex<State>> container;
+    private PriorityQueue<Vertex<State>> container = new PriorityQueue<>();
     private int totNodes = 0;
     private StateGraph<RobotConfig> graph;
-    private HashSet<Vertex<State>> visitedNodes = new HashSet<>();
-    private HashSet<State> unexploredNodes = new HashSet<>();
+    private HashSet<AStarNode<State>> visitedNodes = new HashSet<>();
     private List<State> path = new ArrayList<>();
 
-    public Astar() {
-        container = new PriorityQueue<>();
+    public Astar(StateGraph<RobotConfig> graph) {
         this.graph = graph;
     }
 
@@ -33,9 +31,10 @@ public class Astar  {
     public List<State> search(Vertex<State> initial, Vertex<State> goal) {
         // null for now
         Vertex<State> rootNode = new Vertex<>(initial.getState());
+        // what will be assigned as later nodes' parents
+        AStarNode<State> lastNode = null;
 
         // initialisations
-        unexploredNodes.add(rootNode.getState());
         container.add(rootNode);
 
 
@@ -63,13 +62,15 @@ public class Astar  {
             }
 
             // not the goal - add all successors to container
-            visitedNodes.add(aStarNode.node);
+            visitedNodes.add(aStarNode);
             for (Edge node : aStarNode.node.getNeighbors()) {
                 totNodes++;
 
-                if (!visitedNodes.contains(aStarNode.node)) {
+                if (!visitedNodes.contains(aStarNode)) {
                     // if this node hasn't bene visited, add it to the container
+                    aStarNode.parent = lastNode;
                     container.add(aStarNode.node);
+                    lastNode = aStarNode;
                 }
             }
         }
@@ -96,6 +97,7 @@ public class Astar  {
 
     public void reset() {
         container.clear();
+        visitedNodes.clear();
     }
 
     public int totNodes() {
@@ -110,9 +112,13 @@ public class Astar  {
             this.node = node;
         }
 
-        void setParent(AStarNode<T> parent) {
-            this.parent = parent;
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof AStarNode)) {
+                return false;
+            }
+            AStarNode other = (AStarNode) o;
+            return node.equals(other.node) && parent.equals(other.parent);
         }
-
     }
 }
