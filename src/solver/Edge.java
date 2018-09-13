@@ -4,22 +4,22 @@ package solver;
  * A class for the edge of StateGraph.
  * Each edge contains the start vertex, end vertex, and the cost from start to end
  */
-public class Edge {
+public class Edge<T> {
     //start vertex
-    private Vertex start;
+    private Vertex<T> start;
     //target vertex
-    private Vertex end;
+    private Vertex<T> end;
     //the cost from start to end
     private double cost;
 
-    public Edge(Vertex start, Vertex end, double cost) {
+    public Edge(Vertex<T> start, Vertex<T> end, double cost) {
         this.start = start;
         this.end = end;
         this.cost = cost;
     }
 
     //set cost to 1 if no cost given
-    public Edge(Vertex start, Vertex end) {
+    public Edge(Vertex<T> start, Vertex<T> end) {
         this.start = start;
         this.end = end;
         this.cost = 1;
@@ -29,7 +29,7 @@ public class Edge {
      *
      * @return start vertex of this edge
      */
-    public Vertex getStart() {
+    public Vertex<T> getStart() {
         return this.start;
     }
 
@@ -37,7 +37,7 @@ public class Edge {
      *
      * @return end vertex of this edge
      */
-    public Vertex getEnd() {
+    public Vertex<T> getEnd() {
         return this.end;
     }
 

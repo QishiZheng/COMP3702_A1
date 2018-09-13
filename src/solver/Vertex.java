@@ -6,15 +6,15 @@ import java.util.List;
 
 
 /**
- * Node class for StateGraph
+ * Node/Vertex class for StateGraph
  *
  */
-public class Vertex<State> {
-    private State state;
+public class Vertex<T> {
+    private T state;
     //all edges that connected to this vertex
     private List<Edge> neighbors;
 
-    public Vertex(State s) {
+    public Vertex(T s) {
         this.state = s;
         this.neighbors = new ArrayList<Edge>();
     }
@@ -23,7 +23,7 @@ public class Vertex<State> {
      *
      * @return the state that stored in this node
      */
-    public State getState() {
+    public T getState() {
         return this.state;
     }
 
@@ -60,7 +60,6 @@ public class Vertex<State> {
         }
         return false;
     }
-
 
     /**
      *  check if this edge is a neighbor of this vertex

@@ -4,27 +4,30 @@ package solver;
  * A generic search tree node representing a path through a state graph. Stores
  * a state, the cost of the last edge followed, and the total cost of all edges
  * in the path associated with this node.
+ *************************************************************************
+ * This is for A* search algorithm and maybe RRT
+ * **********************************************************************
  */
 public class SearchTreeNode implements Comparable<SearchTreeNode> {
 
     private SearchTreeNode parent;
-    private StateCostPair stateCostPair;
+//    private StateCostPair stateCostPair;
     private double pathCost = 0;
     private int depth = 0;
 
     //TODO: A HELL LOT NEED TO BE DONE HERE
 
-    public SearchTreeNode(StateCostPair stateCostPair) {
-        this.parent = null;
-        this.stateCostPair = stateCostPair;
-    }
-
-    public SearchTreeNode(SearchTreeNode parent, StateCostPair stateCostPair) {
-        this.parent = parent;
-        this.stateCostPair = stateCostPair;
-        this.pathCost = parent.getPathCost() + stateCostPair.getCost();
-        this.depth = parent.getDepth() + 1;
-    }
+//    public SearchTreeNode(StateCostPair stateCostPair) {
+//        this.parent = null;
+//        this.stateCostPair = stateCostPair;
+//    }
+//
+//    public SearchTreeNode(SearchTreeNode parent, StateCostPair stateCostPair) {
+//        this.parent = parent;
+//        this.stateCostPair = stateCostPair;
+//        this.pathCost = parent.getPathCost() + stateCostPair.getCost();
+//        this.depth = parent.getDepth() + 1;
+//    }
 
     public SearchTreeNode getParent() {
         return parent;

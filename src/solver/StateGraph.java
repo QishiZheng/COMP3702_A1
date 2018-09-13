@@ -3,33 +3,32 @@ package solver;
 import problem.ProblemSpec;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
- * A graph data structure that stores nodes of state
+ * A graph data structure that for building roadmap with PRM
  */
-public class StateGraph {
-    private Vertex root;
-    private Vertex goal;
-    private List<Vertex> vertices;
-    private List<Edge> edges;
+public class StateGraph<T> {
+    private Vertex<T> root;
+    private Vertex<T> goal;
+    private List<Vertex<T>> vertices;
+    private List<Edge<T>> edges;
 
     /**
      * Construct the state graph with root and goal vertices/states
      * @param root
      * @param goal
      */
-    public StateGraph(Vertex root, Vertex goal) {
+    public StateGraph(Vertex<T> root, Vertex<T> goal) {
         this.root = root;
         this.goal = goal;
-        vertices = new ArrayList<Vertex>();
-        edges = new ArrayList<Edge>();
+        vertices = new ArrayList<Vertex<T>>();
+        edges = new ArrayList<Edge<T>>();
     }
 
     public StateGraph() {
-        vertices = new ArrayList<Vertex>();
-        edges = new ArrayList<Edge>();
+        vertices = new ArrayList<Vertex<T>>();
+        edges = new ArrayList<Edge<T>>();
     }
 
     /**
@@ -38,7 +37,7 @@ public class StateGraph {
      * @return the root vertex if one is set, null if no vertex has been set as
      *         the root.
      */
-    public Vertex getRootVertex() {
+    public Vertex<T> getRootVertex() {
         return this.root;
     }
 
@@ -48,7 +47,7 @@ public class StateGraph {
      * @return the goal vertex if one is set, null if no vertex has been set as
      *         the goal.
      */
-    public Vertex getGoalVertex() {
+    public Vertex<T> getGoalVertex() {
         return this.goal;
     }
 
@@ -57,7 +56,7 @@ public class StateGraph {
      * @param v the given vertex
      * @return true iff the the given vertex is added to this graph
      */
-    public boolean addVertex(Vertex v) {
+    public boolean addVertex(Vertex<T> v) {
         if (!this.hasVertex(v)) {
             this.vertices.add(v);
             return true;
@@ -71,7 +70,7 @@ public class StateGraph {
      * @param v given vertex
      * @return true iff the given vertex is removed from this graph
      */
-    public boolean removeVertex(Vertex v) {
+    public boolean removeVertex(Vertex<T> v) {
         if (this.hasVertex(v)) {
             this.vertices.remove(v);
             if (v == this.root) {
@@ -89,7 +88,7 @@ public class StateGraph {
      * @param e the given edge
      * @return true iff the the given edge is added to this graph
      */
-    public boolean addEdge(Edge e) {
+    public boolean addEdge(Edge<T> e) {
         if (!this.hasEdge(e)) {
             this.edges.add(e);
             e.getStart().addNeighbor(e);
@@ -107,7 +106,7 @@ public class StateGraph {
      * @param e given edge
      * @return true iff the given edge is removed from this graph
      */
-    public boolean removeEdge(Edge e) {
+    public boolean removeEdge(Edge<T> e) {
         if (this.hasEdge(e)) {
             this.edges.remove(e);
             e.getStart().removeNeighbor(e);
@@ -124,14 +123,14 @@ public class StateGraph {
      * @param v given vertex
      * @return true if this graph contains v
      */
-    public boolean hasVertex(Vertex v) { return this.vertices.contains(v); }
+    public boolean hasVertex(Vertex<T> v) { return this.vertices.contains(v); }
 
     /**
      * Check if the graph contains given edge and the two vertices in the edge
      * @param e given edge
      * @return true if this graph contains e and the two vertices in the edge
      */
-    public boolean hasEdge(Edge e) {
+    public boolean hasEdge(Edge<T> e) {
         if ((this.hasVertex(e.getStart())) && (this.hasVertex(e.getEnd()))) {
             return this.edges.contains(e);
         }
