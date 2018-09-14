@@ -7,9 +7,9 @@ import java.util.*;
 /**
  * Astart search algorithm for searching shortest path in the state graph.
  */
-public class Astar  {
+public class Astar<T>  {
 
-    private PriorityQueue<Vertex<State>> container = new PriorityQueue<>();
+    private PriorityQueue<Vertex<T>> container = new PriorityQueue<>();
     private int totNodes = 0;
     private StateGraph<RobotConfig> graph;
 
@@ -22,24 +22,24 @@ public class Astar  {
      * @param graph the state graph to A* search in
      * @return the optimal path
      */
-    public List<State> search(StateGraph<State> graph) {
+    public List<T> search(StateGraph<T> graph) {
         return search(graph.getRootVertex(), graph.getGoalVertex());
     }
 
-    public List<State> search(Vertex<State> initial, Vertex<State> goal) {
+    public List<T> search(Vertex<T> initial, Vertex<T> goal) {
         // null for now
-        Vertex<State> rootNode = new Vertex<>(initial.getState());
+        Vertex<T> rootNode = new Vertex<>(initial.getState());
         // what will be assigned as later nodes' parents
-        AStarNode<State> lastNode = null;
+        AStarNode<T> lastNode = null;
 
         // initialisations
         container.add(rootNode);
-        List<AStarNode<State>> visitedNodes = new ArrayList<>();
+        List<AStarNode<T>> visitedNodes = new ArrayList<>();
 
 
         while (container.size() > 0) {
             // select the search tree node with the lowest total path cost
-            Vertex<State> currentNode = container.poll();
+            Vertex<T> currentNode = container.poll();
 
             if (currentNode == null) {
                 // no possible path
@@ -47,14 +47,14 @@ public class Astar  {
             }
 
             // aStarNode.node is currentNode
-            AStarNode<State> aStarNode = new AStarNode<>(currentNode);
+            AStarNode<T> aStarNode = new AStarNode<>(currentNode);
 
             totNodes--;
 
             if (aStarNode.node.getState().equals(goal.getState())) {
 
                 // the path has been found! Calculate the distance
-                List<State> pathToGoal = findPathFromNode(aStarNode);
+                List<T> pathToGoal = findPathFromNode(aStarNode);
 
                 reset();
                 return pathToGoal;
@@ -79,11 +79,11 @@ public class Astar  {
         return null;
     }
 
-    private List<State> findPathFromNode(AStarNode<State> node) {
-        List<State> finalPath = new ArrayList<>();
+    private List<T> findPathFromNode(AStarNode<T> node) {
+        List<T> finalPath = new ArrayList<>();
         // add this node as the first element
         finalPath.add(node.node.getState());
-        AStarNode<State> parentNode = node.parent;
+        AStarNode<T> parentNode = node.parent;
         while (parentNode != null) {
             finalPath.add(parentNode.node.getState());
             parentNode = parentNode.parent;
