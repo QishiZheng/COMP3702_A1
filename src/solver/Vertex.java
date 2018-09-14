@@ -31,7 +31,7 @@ public class Vertex<T> {
      *
      * @return a set of all neighbor edges that this vertex connected to
      */
-    public List getNeighbors() {
+    public List<Edge> getNeighbors() {
         return new ArrayList<Edge>(this.neighbors);
     }
 

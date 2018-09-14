@@ -46,6 +46,14 @@ public class StateGraph<T> {
     }
 
     /**
+     *
+     * @return a list of all vertices in the graph
+     */
+    public List<Vertex<T>> getAllVertices() {
+        return new ArrayList<Vertex<T>>(this.vertices);
+    }
+
+    /**
      * Get the goal vertex
      *
      * @return the goal vertex if one is set, null if no vertex has been set as
