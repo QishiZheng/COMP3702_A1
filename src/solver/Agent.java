@@ -30,8 +30,9 @@ public class Agent {
 //        RobotConfig r2 = randomRobotConfig();
 //        PRM prm = new PRM(ps, s, 1000, 20, r1, r2);
 //        StateGraph sg = prm.buildGraph();
-//        //System.out.println("#Vertex: "+sg.numOfVertex());
-//
+//        System.out.println("#Vertex: "+sg.numOfVertex());
+//        System.out.println("Num of edges that Root vertex has: " + sg.getRootVertex().getNumOfNeighbors());
+//        System.out.println("Num of edges that Goal vertex has: " + sg.getGoalVertex().getNumOfNeighbors());
 //
 //    }
 //

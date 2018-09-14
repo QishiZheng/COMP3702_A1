@@ -79,7 +79,7 @@ public class PRM {
             //PriorityQueue for holding the k closest neighbor RobotConfigs
             PriorityQueue<RobotConfig> pq = new PriorityQueue<RobotConfig>(k, comp);
 
-            //list of k nearest neighbors
+            //list of k nearest neighbors for vr1
             List<Vertex<RobotConfig>> neighbors = new ArrayList<Vertex<RobotConfig>>();
             for(Vertex<RobotConfig> vr2 : roadmap.getAllVertices()) {
                 //no need to set the vertex itself as its neighbor
@@ -101,15 +101,11 @@ public class PRM {
                 }
             }
 
-            //add edge of this vertex to roadmap
-//            roadmap.addEdge(new Edge<RobotConfig>(vr1, vr2));
-
+            //add edges of this vertex to roadmap
+            for(int i = 0; i < neighbors.size(); i++) {
+                roadmap.addEdge(new Edge<>(vr1, neighbors.get(i)));
+            }
         }
-
-
-        //TODO: Try to connect each vertex with their k nearest neighbors
-
-
 
         return roadmap;
     }
