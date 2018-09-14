@@ -20,7 +20,6 @@ public class State {
     //state of static obstacles
     private List<StaticObstacle> staticObstState;
 
-
     private ProblemSpec problemSpec;
 
 
@@ -35,7 +34,7 @@ public class State {
         this.robotState = ps.getInitialRobotConfig();
         this.boxState = ps.getMovingBoxes();
         this.movingObstState = ps.getMovingObstacles();
-        staticObstState = ps.getStaticObstacles();
+        //staticObstState = ps.getStaticObstacles();
     }
 
 
@@ -75,28 +74,10 @@ public class State {
         return this.movingObstState;
     }
 
-    /**
-     * Get the first point of the robot
-     * @param r the robot
-     * @param ps the problem spec that this robot config is from
-     * @return A Point2D representing the first point.
+    /** Get the static obstacles state
+     * @return a list of static obstacles
      */
-    public Point2D getPoint2(RobotConfig r, ProblemSpec ps) {
-        double x = r.getPos().getX() + Math.cos(r.getOrientation()) * ps.getRobotWidth() * 0.5;
-        double y = r.getPos().getY() + Math.sin(r.getOrientation()) * ps.getRobotWidth() * 0.5;
-        return new Point2D.Double(x,y);
-    }
-    /**
-     * Get the second point of the robot
-     * @param r the robot
-     * @param ps the problem spec that this robot config is from
-     * @return A Point2D representing the second point.
-     */
-    public Point2D getPoint1(RobotConfig r, ProblemSpec ps) {
-        double x = r.getPos().getX() - Math.cos(r.getOrientation()) * ps.getRobotWidth() * 0.5;
-        double y = r.getPos().getY() - Math.sin(r.getOrientation()) * ps.getRobotWidth() * 0.5;
-        return new Point2D.Double(x,y);
-    }
+    public List<StaticObstacle> getStaticObstSt() { return staticObstState; }
 
 
     /**
@@ -112,38 +93,10 @@ public class State {
         List<Box> movables = new ArrayList<>();
         movables.addAll(this.getBoxes());
         movables.addAll(this.getMovingObst());
-        System.out.println("Size of Obs: " + movables.size() + "\n");
+        //System.out.println("Size of Obs: " + movables.size() + "\n");
         return ts.hasCollision(rc, movables);
 
     }
-
-
-     /** Get the static obstacles state
-     * @return a list of static obstacles
-     */
-    public List<StaticObstacle> getStaticObstSt() { return staticObstState; }
-
-
-    /**
-     * TODO: TO BE IMPLEMENTED
-     * Get the cost from current state to given state s
-     * @param s given goal state
-     * @return cost cost from current state to given state s
-     */
-    public double costToState(State s) {
-        return 0;
-    }
-
-    /**
-     * TODO: TO BE IMPLEMENTED
-     * Get all state that this state can reach
-     * @return all neighbours of this state
-     */
-//    public List<State> getNeighbour() {
-//        List<State> neighbours = new ArrayList<State>();
-//
-//        return neighbours;
-//    }
 
 
     /**
@@ -170,6 +123,49 @@ public class State {
     }
 
 
+    /**
+     * Get the first point of the robot
+     * @param r the robot
+     * @param ps the problem spec that this robot config is from
+     * @return A Point2D representing the first point.
+     */
+    public Point2D getPoint2(RobotConfig r, ProblemSpec ps) {
+        double x = r.getPos().getX() + Math.cos(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        double y = r.getPos().getY() + Math.sin(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        return new Point2D.Double(x,y);
+    }
+    /**
+     * Get the second point of the robot
+     * @param r the robot
+     * @param ps the problem spec that this robot config is from
+     * @return A Point2D representing the second point.
+     */
+    public Point2D getPoint1(RobotConfig r, ProblemSpec ps) {
+        double x = r.getPos().getX() - Math.cos(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        double y = r.getPos().getY() - Math.sin(r.getOrientation()) * ps.getRobotWidth() * 0.5;
+        return new Point2D.Double(x,y);
+    }
+
+    /**
+     * TODO: TO BE IMPLEMENTED
+     * Get the cost from current state to given state s
+     * @param s given goal state
+     * @return cost cost from current state to given state s
+     */
+    public double costToState(State s) {
+        return 0;
+    }
+
+    /**
+     * TODO: TO BE IMPLEMENTED
+     * Get all state that this state can reach
+     * @return all neighbours of this state
+     */
+//    public List<State> getNeighbour() {
+//        List<State> neighbours = new ArrayList<State>();
+//
+//        return neighbours;
+//    }
 
     /**
      * TODO: TO BE IMPLEMENTED
