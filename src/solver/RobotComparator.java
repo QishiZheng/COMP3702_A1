@@ -45,6 +45,7 @@ public class RobotComparator implements Comparator<RobotConfig> {
      * @return The distance between r1 and r2
      */
     private double distanceBetween(RobotConfig r1, RobotConfig r2) {
+        int steps = 0;
         return Math.sqrt(Math.pow(r1.getPos().getX() - r2.getPos().getX(), 2)
                          + Math.pow(r1.getPos().getY() - r2.getPos().getY(), 2)
                          + Math.pow(r1.getOrientation() - r2.getOrientation(), 2));

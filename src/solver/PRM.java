@@ -72,7 +72,7 @@ public class PRM {
 
         //System.out.println("SIZE: " + roadmap.numOfVertex() + "\n");
 
-        //TODO: Get the k nearest reachable neighbor vertices
+        //Get the k nearest reachable neighbor vertices
         for(Vertex<RobotConfig> vr1 : roadmap.getAllVertices()) {
             RobotComparator comp = new RobotComparator();
             comp.setRobot(vr1.getState());
@@ -84,9 +84,6 @@ public class PRM {
             for(Vertex<RobotConfig> vr2 : roadmap.getAllVertices()) {
                 //no need to set the vertex itself as its neighbor
                 if (vr2.getState().equals(vr1.getState())) { continue; }
-                //check if this neighbor vertex is reachable:
-                //  Sample multiple points between start and end vertex,
-                //  then check if each point is collision free
 
                 //if the neighbor vertex is reachable, add it to pq
                 if(isPathCollisionFree(vr2.getState(), vr1.getState())) {
@@ -110,16 +107,66 @@ public class PRM {
         return roadmap;
     }
 
-//    /**
-//     * Check if given robot config has collision with all of the movable objects
-//     * in the giving list of boxes
-//     * @param rc robot config
-//     * @param movables a list of movable objects, include moving boxes and movable obstacles
-//     * @return true if has collision
-//     */
-//    private boolean hasCollision(RobotConfig rc, List<Box> movables) {
-//        return ts.hasCollision(rc, movables);
+    /**
+     * Find the optimised path in the given state graph of robotConfig
+     * @param sg given state graph
+     * @return a list of robotConfig in the order of moving path
+     */
+    public List<RobotConfig> searchPath(StateGraph<RobotConfig> sg) {
+        Astar<RobotConfig> searcher  = new Astar<RobotConfig>(sg);
+//        List<RobotConfig> path = searcher.search(sg);
+        return searcher.search(sg);
+    }
+
+//    private List<RobotConfig> astar (StateGraph<RobotConfig> sg) {
+//        PriorityQueue<RobotConfig> container = new PriorityQueue<>();
+//        HashMap<RobotConfig, Double> explored = new HashMap<RobotConfig, Double>();
+//        HashMap<RobotConfig, RobotConfig> parents = new HashMap<RobotConfig, RobotConfig>();
+//        // Add the start robot to the container
+//        container.add(sg.getRootVertex().getState());
+//        sRobot.setCost(0);
+//        explored.put(sRobot, sRobot.priority());
+//        parents.put(sRobot, null);
+//        while (!container.isEmpty()) {
+//            // Get the front of the priority queue
+//            RobotConfig blah = container.poll();
+//            // Get rid of duplicates
+//            if (explored.containsKey(blah)) {
+//                if (explored.get(blah) < blah.priority())
+//                    continue;
+//            }
+//            // Goal test
+//            if (blah.equals(gRobot)) {
+//                return backchainz(blah, parents);
+//            }
+//            //Get neighboring configurations
+//            Set<RobotConfig> successors = map.get(blah);
+//            for (RobotConfig node : successors) {
+//                // Set goal to be our goal
+//                node.setGoal(gRobot);
+//                // Set the cost of the configuration
+//                node.setCost(blah.getCost() + planner.moveInParallel(blah.get(), node.get()));
+//                // Check and mark duplicate
+//                if (!explored.containsKey(node)) {
+//                    container.add(node);
+//                    explored.put(node, node.priority());
+//                    parents.put(node, blah);
+//                } else if (explored.containsKey(node)) {
+//                    if (explored.get(node) > node.priority()) {
+//                        explored.put(node, node.priority());
+//                        parents.put(node, blah);
+//                        container.add(node);
+//                    }
+//                }
+//
+//            }
+//
+//        }
+//        return null;
+//
 //    }
+
+
 
     /**
      * Sample an random robot config uniformly
