@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class RRT {
     // Class Variables //
-    private int maxNodes;
+    private final int MAX_NODES = 1000000;
     private final double STEP_SIZE = 0.001;
     private List<Box> moveableObstacle;
     private List<StaticObstacle> staticObstacle;
@@ -32,7 +32,6 @@ public class RRT {
      * @param goal the goal where the box has to be moved to
      */
     public RRT(State initState, MovingBox currBox, Point2D goal) {
-        this.maxNodes = (int) Math.round((1 / currBox.getWidth()) * (1 / currBox.getWidth()));
         this.currBox = currBox;
         this.currPos = currBox.getPos();
         this.goal = goal;
@@ -48,10 +47,12 @@ public class RRT {
     // Methods //
     public void setNodePath() {
         Node start = new Node(currPos);
-        nodePath = pathSearch();
+        Node end = new Node(goal);
+        allNodes.add(start);
+        nodePath = pathSearch(start);
     }
 
-    public LinkedList<Node> pathSearch() {
+    public LinkedList<Node> pathSearch(Node start) {
         // Make random Node
         Random random = new Random();
         Point2D randPoint = new Point2D.Double(random.nextInt(1000) / 1000.0
@@ -82,14 +83,13 @@ public class RRT {
         }
         newNode = new Node(point);
 
-        // Check if newNode pos is blocked by Moveable Obstacles
+        // Check if newNode pos is not blocked by Moveable Obstacles
         currBox.setRect(newNode.getCurrPos());
         for (Box obst : moveableObstacle) {
-            // Intersects with obstacle
             if (currBox.getRect().intersects(obst.getRect().getX(), obst.getRect().getY()
                     , obst.getWidth(), obst.getWidth())) {
                 // currBox intersects, so skip discard newNode, start a next random search
-                return pathSearch();
+                return pathSearch(start);
             }
         }
         // Check if newNode pos is not blocked by Static Obstacles
@@ -97,10 +97,11 @@ public class RRT {
             if (currBox.getRect().intersects(obst.getRect().getX(), obst.getRect().getY()
                     , obst.getRect().getWidth(), obst.getRect().getWidth())) {
                 // currBox intersects, so skip discard newNode, start a next random search
-                return pathSearch();
+                return pathSearch(start);
             }
         }
         // TODO: Check if there is enough room for robot to move around the box
+
 
 
         // All constraints has been checked and passed, add newNode to parent
@@ -121,13 +122,13 @@ public class RRT {
             } while (nodeCheck != null);
             return path;
 
-        } else if (allNodes.size() < maxNodes){
+        } else if (allNodes.size() < MAX_NODES){
             // start another search
-            return pathSearch();
+            return pathSearch(start);
         }
 
         // if this code is reached, it means allNode size is more than
-        // the maxNodes number, its very likely that there is no path.
+        // the MAX_NODE number
         return null;
     }
 
