@@ -26,8 +26,8 @@ public class RobotComparator implements Comparator<RobotConfig> {
      */
     @Override
     public int compare(RobotConfig a, RobotConfig b) {
-        Double ca = currentRobot.getPos().distance(a.getPos());
-        Double cb = currentRobot.getPos().distance(b.getPos());
+        Double ca = distanceBetween(this.currentRobot, a);
+        Double cb = distanceBetween(this.currentRobot, b);
         if(ca < cb) {
             return -1;
         } else if (ca > cb) {
@@ -35,5 +35,18 @@ public class RobotComparator implements Comparator<RobotConfig> {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Calculate the distance between two robotConfigs,
+     * A RobotConfig is treated as a 3d point here
+     * @param r1 RobotConfig 1
+     * @param r2 RobotConfig 2
+     * @return The distance between r1 and r2
+     */
+    private double distanceBetween(RobotConfig r1, RobotConfig r2) {
+        return Math.sqrt(Math.pow(r1.getPos().getX() - r2.getPos().getX(), 2)
+                         + Math.pow(r1.getPos().getY() - r2.getPos().getY(), 2)
+                         + Math.pow(r1.getOrientation() - r2.getOrientation(), 2));
     }
 }
