@@ -5,7 +5,6 @@ import problem.ProblemSpec;
 import problem.RobotConfig;
 import tester.Tester;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
@@ -57,7 +56,7 @@ public class PRM {
         Vertex<RobotConfig> initVertex = new Vertex<>(this.init);
         //set goal vertex
         Vertex<RobotConfig> goalVertex = new Vertex<>(this.goal);
-        //initialise teh stateGraph with init and goal vertex
+        //initialise the stateGraph with init and goal vertex
         StateGraph<RobotConfig> roadmap = new StateGraph<RobotConfig>(initVertex, goalVertex);
 
         //sample n random robotConfig
@@ -65,7 +64,7 @@ public class PRM {
             RobotConfig sample = randomRobotConfig();
             //check if this sample config collides with any obstacles,
             //Add the sample to roadMap/graph if no collision
-            if(!(this.states.robotCollision(sample))) {
+            if(!(this.states.robotCollisionFree(sample))) {
                 roadmap.addVertex(new Vertex<RobotConfig>(sample));
                 //System.out.println("POS: (" + sample.getPos().getX() + ", " + sample.getPos().getY() + ")\n");
             }
@@ -77,25 +76,36 @@ public class PRM {
         for(Vertex<RobotConfig> vr1 : roadmap.getAllVertices()) {
             RobotComparator comp = new RobotComparator();
             comp.setRobot(vr1.getState());
-            //PriorityQueue for holding the k closest neighbor vertices
-            PriorityQueue<RobotConfig> pq = new PriorityQueue<>(k, comp);
+            //PriorityQueue for holding the k closest neighbor RobotConfigs
+            PriorityQueue<RobotConfig> pq = new PriorityQueue<RobotConfig>(k, comp);
 
-            //list of k neighbors
+            //list of k nearest neighbors for vr1
             List<Vertex<RobotConfig>> neighbors = new ArrayList<Vertex<RobotConfig>>();
             for(Vertex<RobotConfig> vr2 : roadmap.getAllVertices()) {
                 //no need to set the vertex itself as its neighbor
                 if (vr2.getState().equals(vr1.getState())) { continue; }
+                //check if this neighbor vertex is reachable:
+                //  Sample multiple points between start and end vertex,
+                //  then check if each point is collision free
 
-                //check if this neighbor is reachable
-
+                //if the neighbor vertex is reachable, add it to pq
+                if(isPathCollisionFree(vr2.getState(), vr1.getState())) {
+                    pq.add(vr2.getState());
+                }
             }
 
+            //added k nearest reachable neighbor to neighbor list
+            for (int i = 0; i < k; ++i) {
+                if(pq.peek() != null) {
+                    neighbors.add(new Vertex<RobotConfig>(pq.poll()));
+                }
+            }
+
+            //add edges of this vertex to roadmap
+            for(int i = 0; i < neighbors.size(); i++) {
+                roadmap.addEdge(new Edge<>(vr1, neighbors.get(i)));
+            }
         }
-
-
-        //TODO: Try to connect each vertex with their k nearest neighbors
-
-
 
         return roadmap;
     }
@@ -145,6 +155,40 @@ public class PRM {
         return rad * Math.PI;
     }
 
+    /**
+     * Check if the path between RobotConfig is collision free
+     * @param r1 RobotConfig 1
+     * @param r2 RobotConfig 1
+     * @return true if the path is collision free
+     */
+    private boolean isPathCollisionFree(RobotConfig r1, RobotConfig r2) {
+        List<RobotConfig> samples = new ArrayList<>(sampleOnEdge(r1, r2, 10));
+        for(RobotConfig r : samples) {
+            if(!this.states.robotCollisionFree(r)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Sample n RobotConfigs between RobotConfig r1 and RobotConfig r2
+     * @param r1 RobotConfig 1
+     * @param r2 RobotConfig 2
+     * @param n number of samples
+     * @return A list of n RobotConfigs
+     */
+    private List<RobotConfig> sampleOnEdge(RobotConfig r1, RobotConfig r2, int n) {
+        List<RobotConfig> samples = new ArrayList<>();
+        for(int i = 0; i < n; i++) {
+            Double x = r1.getPos().getX() + (i * ((Math.abs(r1.getPos().getX() - r2.getPos().getX())) / n));
+            Double y = r1.getPos().getY() + (i * ((Math.abs(r1.getPos().getY() - r2.getPos().getY())) / n));
+            Double angle = r1.getPos().getY() + (i * ((Math.abs(r1.getOrientation() - r2.getOrientation())) / n));
+            RobotConfig s  = new RobotConfig(new Point2D.Double(x, y), angle);
+            samples.add(s);
+        }
+        return samples;
+    }
 
 
     //For testing methods
