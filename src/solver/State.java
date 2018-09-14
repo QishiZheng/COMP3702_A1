@@ -103,10 +103,10 @@ public class State {
      * Check if given robot config has collision with all of the movable objects
      * in this problem spec
      * @param rc robot config
-     * @return true if has collision
+     * @return true if has no collision
      *
      */
-    public boolean robotCollision(RobotConfig rc) {
+    public boolean robotCollisionFree(RobotConfig rc) {
         Tester ts = new Tester(problemSpec);
 
         List<Box> movables = new ArrayList<>();
