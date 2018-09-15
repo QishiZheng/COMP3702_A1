@@ -34,7 +34,8 @@ public class Agent {
         RobotConfig r1 = new RobotConfig(new Point2D.Double(0.7, 0.7), 0.02);
         System.out.println("Root robotConf: (" +r1.getPos().getX() + ", "
                 + r1.getPos().getY() + ", " + r1.getOrientation() + ")");
-        RobotConfig r2 = new RobotConfig(new Point2D.Double(0.1, 0.1), 0.02);        System.out.println("Goal robotConf: (" +r2.getPos().getX() + ", "
+        RobotConfig r2 = new RobotConfig(new Point2D.Double(0.1, 0.1), 0.02);
+        System.out.println("Goal robotConf: (" +r2.getPos().getX() + ", "
                 + r2.getPos().getY() + ", " + r2.getOrientation() + ")");
         PRM prm = new PRM(ps, s, 2500, 25, r1, r2);
         StateGraph sg = prm.buildGraph();
@@ -49,14 +50,17 @@ public class Agent {
         System.out.println("Num of edges that Root vertex has: " + sg.getRootVertex().getNumOfNeighbors());
         System.out.println("Num of edges that Goal vertex has: " + sg.getGoalVertex().getNumOfNeighbors());
 
-
         //check if the path exists
-        if(prm.BFS(sg) != null) {
-            List<RobotConfig> path = prm.BFS(sg);
+        List<RobotConfig> path = prm.BFS(sg);
+        if(path != null) {
             for(int i = 0; i < path.size(); i++) {
-            RobotConfig r = path.get(i);
-            System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
-                    + r.getPos().getY() + ", " + r.getOrientation() + ")");
+                RobotConfig r = path.get(i);
+                System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
+                        + r.getPos().getY() + ", " + r.getOrientation() + ")");
+                // Vince this is where s.getStaticObstSt() was returning null
+                p(s.getStaticObstSt());
+                RRT rrt = new RRT(s.getBoxes().get(0), r.getPos(), s.getMovingObst(), s.getStaticObstSt());
+                p("RRRT: " + rrt);
             }
         } else {
             System.out.println("No Solution");
@@ -111,8 +115,10 @@ public class Agent {
         return rad * Math.PI;
     }
 
-
-
+    /** For debugging */
+    static private void p(Object o) {
+        System.out.println(o.toString());
+    }
 
 
 
