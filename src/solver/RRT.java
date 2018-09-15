@@ -4,6 +4,7 @@ import problem.Box;
 import problem.MovingBox;
 import problem.MovingObstacle;
 import problem.StaticObstacle;
+import tester.Tester;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -17,7 +18,7 @@ import java.util.*;
 public class RRT {
     // Class Variables //
     private final int MAX_NODES = 1000000;
-    private final double STEP_SIZE = 0.001;
+    private final double STEP_SIZE = Tester.MAX_BASE_STEP;
     private final DecimalFormat DECIMAL = new DecimalFormat("0.###");
     private List<MovingBox> moveableBox;
     private List<MovingObstacle> moveableObstacle;
@@ -53,13 +54,22 @@ public class RRT {
     }
 
     // Methods //
+
+    /**
+     * initializes coordPath filling it with the solution path
+     */
     private void setCoordPath() {
         addToList(startList, start);
         addToList(endList, end);
         coordPath = pathSearch();
     }
 
+    /**
+     * the main algorithm of RRT, switches between finding a path from start and goal.
+     * @return a LinkedList filled with Point2D objects that forms a path from start to goal.
+     */
     private LinkedList<Point2D> pathSearch() {
+        // flip determines whether to expand the path from start node or goal node. False = start, True = goal
         boolean flip = false;
         loop:
         while (allNodes.size() < MAX_NODES) {
@@ -201,15 +211,28 @@ public class RRT {
         return null;
     }
 
+    /**
+     * add a specific Node to the specified list (either startList or endList) and also add it to allNodes list
+     * @param list the list to add Node to
+     * @param node the Node to add to the list
+     */
     private void addToList(List<Node> list, Node node) {
         list.add(node);
         allNodes.add(node);
     }
 
+    /**
+     * check if the given box has enough room for the robot to rotate in relation to the given obstacle.
+     * @param box the box that robot has to rotate around
+     * @param obst the obstacle to be checked if robot is not blocked by it
+     * @param parent the parent node to check if robot requires change of direction
+     * @param child the child node to check if robot requires change of direction
+     * @return True if not enough room, False if enough room
+     */
     private boolean notEnoughRoom(Rectangle2D box, Rectangle2D obst, Node parent, Node child) {
-        // Case 1: Robot switch from left side of box to bot side or vice versa,
         if (parent.getDirection() == null) {
             return false;
+            // Case 1: Robot switch from left side of box to bot side or vice versa,
         } else if ((parent.getDirection().equals("r") && child.getDirection().equals("u"))
                 || (parent.getDirection().equals("u") && child.getDirection().equals("r"))) {
             Point2D leftBoxPoint = new Point2D.Double((box.getX() - (box.getWidth() / 2)), box.getCenterY());
@@ -261,6 +284,104 @@ public class RRT {
     }
 
 
+    /**
+     * A private Node class that stores the required information about each node in RRT
+     */
+    public class Node {
+        // Class Variables //
+        private Point2D currPos;
+        private double xPos;
+        private double yPos;
+        private String direction = null; // Only the root node will have null direction
+        private Node parent = null; // Only the root node will have null parent
 
+        // Constructors //
+        private Node(Point2D pos) {
+            currPos = pos;
+            xPos = pos.getX();
+            yPos = pos.getY();
+        }
+
+        // Methods //
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Node) {
+                Node n = (Node) o;
+                return n.getCurrPos().equals((currPos));
+            }
+            return false;
+        }
+
+        private  Point2D getCurrPos() {
+            return currPos;
+        }
+
+        private double getX() {
+            return xPos;
+        }
+
+        private double getY() {
+            return yPos;
+        }
+
+        /**
+         * Search for the closest Node from the given list in relation to this Node.
+         * @param list the list to be searched
+         * @return the closest Node from the list
+         */
+        private Node nearestNode(List<Node> list) {
+            double distance = 2000; // The maximum distance between 2 points in a 1x1 grid is sqrt(2)
+            Node node = null;
+            for (Node n : list) {
+                Double length = Math.abs(n.getY() - this.getY());
+                Double width = Math.abs(n.getX() - this.getY());
+                if ((length + width) < distance) {
+                    distance = (length + width);
+                    node = n;
+                }
+            }
+            return node;
+        }
+
+        /**
+         * search for any Node in the given list that is STEP_SIZE away from this Node
+         * @param list the list to be searched with
+         * @return the Node that is STEP_SIZE away from this Node, if there is none returns null
+         */
+        private Node nextToList(List<Node> list) {
+            for (Node n : list) {
+                if ((xPos + STEP_SIZE == n.getX() && yPos == n.getY())
+                        || (xPos - STEP_SIZE == n.getX() && yPos == n.getY())
+                        || (yPos + STEP_SIZE == n.getY() && xPos == n.getX())
+                        || (yPos - STEP_SIZE == n.getY() && xPos == n.getX())) {
+                    return n;
+                }
+            }
+            return null;
+        }
+
+        private void setParent(Node node) {
+            parent = node;
+        }
+
+        private Node getParent() {
+            return parent;
+        }
+
+        private String getDirection() {
+            return direction;
+        }
+
+        /**
+         * the direction the robot has to in relation to this Node's parent.
+         * @param direction u = up, d = down, l = left, r = right
+         */
+        private void setDirection(String direction) {
+            if (this.direction == null) {
+                this.direction = direction;
+            }
+        }
+    }
 
 }
