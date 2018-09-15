@@ -5,6 +5,7 @@ import problem.ProblemSpec;
 import problem.RobotConfig;
 import tester.Tester;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
@@ -32,7 +33,7 @@ public class PRM {
         this.ts = new Tester(problem);
     }
 
-    //Constructs with maxnode and maxNeighbors
+    //Constructs with maxnode, maxNeighbors, init and goal config
     //TODO: TO BE FULLY IMPLEMENTED
     public PRM(ProblemSpec problem, State s, int maxNode, int maxNeighbor, RobotConfig init, RobotConfig goal) {
         this.ps = problem;
@@ -45,7 +46,38 @@ public class PRM {
         this.ts = new Tester(problem);
     }
 
+    //Constructs with maxnode, maxNeighbors
+    public PRM(ProblemSpec problem, State s, int maxNode, int maxNeighbor) {
+        this.ps = problem;
+        this.n = maxNode;
+        this.k = maxNeighbor;
 
+        this.states = s;
+        this.ts = new Tester(problem);
+    }
+
+    /**
+     * set the init PRM to given robotConf
+     * @param rc
+     */
+    public void setInit(RobotConfig rc) {
+        this.init = rc;
+    }
+
+    /**
+     * set the goal of PRM to given robotConf
+     * @param rc
+     */
+    public void setGoal(RobotConfig rc) {
+        this.goal = rc;
+    }
+
+    //add this node to roadmap, and connect it to the nearest kth node in the map
+    public void addNodeAndConnectNeighbors(StateGraph<RobotConfig> roadmap, RobotConfig rc) {
+        Vertex<RobotConfig> vr = new Vertex<RobotConfig>(rc);
+        roadmap.addVertex(vr);
+        connectKthNearestNeighbors(roadmap, vr);
+    }
 
     /**
      * Build state graph for robot config
@@ -74,6 +106,48 @@ public class PRM {
 
         //Get the k nearest reachable neighbor vertices
         for(Vertex<RobotConfig> vr1 : roadmap.getAllVertices()) {
+            connectKthNearestNeighbors(roadmap, vr1);
+//            RobotComparator comp = new RobotComparator();
+//            comp.setRobot(vr1.getState());
+//            //PriorityQueue for holding the k closest neighbor RobotConfigs
+//            PriorityQueue<RobotConfig> pq = new PriorityQueue<RobotConfig>(k, comp);
+//
+//            //list of k nearest neighbors for vr1
+//            List<Vertex<RobotConfig>> neighbors = new ArrayList<Vertex<RobotConfig>>();
+//            for(Vertex<RobotConfig> vr2 : roadmap.getAllVertices()) {
+//                //no need to set the vertex itself as its neighbor
+//                if (vr2.getState().equals(vr1.getState())) { continue; }
+//
+//                //if the neighbor vertex is reachable, add it to pq
+//                if(isPathCollisionFree(vr2.getState(), vr1.getState())) {
+//                    pq.add(vr2.getState());
+//                }
+//            }
+//
+//            //added k nearest reachable neighbor to neighbor list
+//            for (int i = 0; i < k; ++i) {
+//                if(pq.peek() != null) {
+//                    neighbors.add(new Vertex<RobotConfig>(pq.poll()));
+//                }
+//            }
+//
+//            //add edges of this vertex to roadmap
+//            for(int i = 0; i < neighbors.size(); i++) {
+//                roadmap.addEdge(new Edge<>(vr1, neighbors.get(i)));
+//            }
+        }
+
+        return roadmap;
+    }
+
+
+    /**
+     * Get the k nearest reachable neighbor vertices and connect them
+     * @param roadmap given roadmap
+     */
+    private void connectKthNearestNeighbors(StateGraph<RobotConfig> roadmap, Vertex<RobotConfig> vr1) {
+        //Get the k nearest reachable neighbor vertices
+        //for(Vertex<RobotConfig> vr1 : roadmap.getAllVertices()) {
             RobotComparator comp = new RobotComparator();
             comp.setRobot(vr1.getState());
             //PriorityQueue for holding the k closest neighbor RobotConfigs
@@ -102,25 +176,24 @@ public class PRM {
             for(int i = 0; i < neighbors.size(); i++) {
                 roadmap.addEdge(new Edge<>(vr1, neighbors.get(i)));
             }
-        }
-
-        return roadmap;
-    }
-
-    /**
-     * Find the optimised path in the given state graph of robotConfig
-     * @param sg given state graph
-     * @return a list of robotConfig in the order of moving path
-     */
-    public List<RobotConfig> searchPath(StateGraph<RobotConfig> sg) {
-        Astar<RobotConfig> searcher  = new Astar<RobotConfig>(sg);
-//        List<RobotConfig> path = searcher.search(sg);
-        return searcher.search(sg);
+        //}
     }
 
 
-    //Breadth First Search in the graph of RobotConfig
-    public List<RobotConfig> BFS(StateGraph<RobotConfig> roadmap) {
+//    /**
+//     * Find the optimised path in the given state graph of robotConfig
+//     * @param sg given state graph
+//     * @return a list of robotConfig in the order of moving path
+//     */
+//    public List<RobotConfig> searchPath(StateGraph<RobotConfig> sg) {
+//        Astar<RobotConfig> searcher  = new Astar<RobotConfig>(sg);
+////        List<RobotConfig> path = searcher.search(sg);
+//        return searcher.search(sg);
+//    }
+
+
+    //Breadth First Search in the graph of RobotConfig from init to goal
+    public List<RobotConfig> BFS(StateGraph<RobotConfig> roadmap, RobotConfig rootConf, RobotConfig goalConf) {
         //Queue of Fringe
         Queue<RobotConfig> fringe = new LinkedList<>();
         //map to store backchain data
@@ -250,7 +323,7 @@ public class PRM {
      */
     private Double randomAngle() {
         Double rad = (Double)((new Random().nextInt(1001))/1000.0);
-        return rad * Math.PI;
+        return rad;
     }
 
     /**
