@@ -97,7 +97,7 @@ public class Agent {
         BufferedWriter writer = new BufferedWriter(new FileWriter(f));
 
         // write the amount of primitive steps on the path
-        writer.write(rrt.getCoordPath().size());
+        writer.write(Integer.toString(rrt.getCoordPath().size()));
         writer.newLine();
 
         // write the locations of the robot, boxes and obstacles
