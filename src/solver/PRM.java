@@ -118,6 +118,57 @@ public class PRM {
         return searcher.search(sg);
     }
 
+
+    //Breadth First Search in the graph of RobotConfig
+    public List<RobotConfig> BFS(StateGraph<RobotConfig> roadmap) {
+        //Queue of Fringe
+        Queue<RobotConfig> fringe = new LinkedList<>();
+        //map to store backchain data
+        HashMap<RobotConfig, RobotConfig> reachedFrom = new HashMap<>();
+        //add root node
+        reachedFrom.put(this.init, null);
+        fringe.add(this.init);
+
+        while(!fringe.isEmpty()) {
+            //get the fist node
+            RobotConfig current = fringe.remove();
+            //check if this is the goal
+            if(current.equals(this.goal)) {
+                return backchainz(current, reachedFrom);
+            }
+            //get the neighbor nodes of this node
+            List<Vertex<RobotConfig>> succVertex = roadmap.getSuccessors(new Vertex(current));
+            List<RobotConfig> successors = new LinkedList<>();
+            for(Vertex<RobotConfig> v : succVertex) {
+                successors.add(v.getState());
+            }
+
+            //check each neighbors node
+            for (RobotConfig rc : successors) {
+                //added to reachedFrom if not explored
+                if(!reachedFrom.containsKey(rc)) {
+                    reachedFrom.put(rc, current);
+                    fringe.add(rc);
+                }
+            }
+        }
+        //return null if no solution found
+        return null;
+    }
+
+    private List<RobotConfig> backchainz(RobotConfig node,
+                                              HashMap<RobotConfig, RobotConfig> parent) {
+        LinkedList<RobotConfig> solution = new LinkedList<RobotConfig>();
+        solution.addFirst(node);
+
+        while (parent.get(node) != null) {
+            solution.addFirst(parent.get(node));
+            node = parent.get(node);
+        }
+        return solution;
+    }
+
+
 //    private List<RobotConfig> astar (StateGraph<RobotConfig> sg) {
 //        PriorityQueue<RobotConfig> container = new PriorityQueue<>();
 //        HashMap<RobotConfig, Double> explored = new HashMap<RobotConfig, Double>();

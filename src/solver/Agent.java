@@ -6,6 +6,7 @@ import tester.Tester;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -20,6 +21,9 @@ public class Agent {
     }
 
     public static void main(String[] args) {
+
+        long startTime = System.currentTimeMillis();
+
         ProblemSpec ps = new ProblemSpec();
         try {
             ps.loadProblem("input1.txt");
@@ -27,22 +31,28 @@ public class Agent {
             e.printStackTrace();
         }
         State s = new State(ps);
-        RobotConfig r1 = randomRobotConfig();
+        RobotConfig r1 = new RobotConfig(new Point2D.Double(0.7, 0.7), 0.02);
         System.out.println("Root robotConf: (" +r1.getPos().getX() + ", "
                 + r1.getPos().getY() + ", " + r1.getOrientation() + ")");
-        RobotConfig r2 = randomRobotConfig();
-        System.out.println("Goal robotConf: (" +r2.getPos().getX() + ", "
+        RobotConfig r2 = new RobotConfig(new Point2D.Double(0.1, 0.1), 0.02);        System.out.println("Goal robotConf: (" +r2.getPos().getX() + ", "
                 + r2.getPos().getY() + ", " + r2.getOrientation() + ")");
-        PRM prm = new PRM(ps, s, 1000, 20, r1, r2);
+        PRM prm = new PRM(ps, s, 2500, 25, r1, r2);
         StateGraph sg = prm.buildGraph();
         System.out.println("#Vertex: "+sg.numOfVertex());
+
+        //print out all vertices
+//        List<Vertex<RobotConfig>> vertices = new ArrayList<>(sg.getAllVertices());
+//        for(int i = 0; i < vertices.size(); i++) {
+//            System.out.println(vertices.get(i).toString() + "has #neighbors: " + vertices.get(i).getNumOfNeighbors());
+//        }
+
         System.out.println("Num of edges that Root vertex has: " + sg.getRootVertex().getNumOfNeighbors());
         System.out.println("Num of edges that Goal vertex has: " + sg.getGoalVertex().getNumOfNeighbors());
 
 
         //check if the path exists
-        if(prm.searchPath(sg) != null) {
-            List<RobotConfig> path = prm.searchPath(sg);
+        if(prm.BFS(sg) != null) {
+            List<RobotConfig> path = prm.BFS(sg);
             for(int i = 0; i < path.size(); i++) {
             RobotConfig r = path.get(i);
             System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
@@ -52,6 +62,9 @@ public class Agent {
             System.out.println("No Solution");
         }
 
+        //time taken
+        long endTime = System.currentTimeMillis();
+        System.out.println("Took "+(endTime - startTime)/1000 + " s");
 
         //List<RobotConfig> path = prm.searchPath(sg);
 
