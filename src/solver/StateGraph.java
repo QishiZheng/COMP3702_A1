@@ -54,6 +54,42 @@ public class StateGraph<T> {
     }
 
     /**
+     * Get given vertex in the graph if exists
+     * @param vertex given vertex
+     * @return the vertex that is equal to given vertex,
+     *          return null if not found
+     */
+    public Vertex<T> getVertexInGraph(Vertex<T> vertex) {
+        //return null if there is no such vertex in the graph
+        if(!hasVertex(vertex)) {
+            return null;
+        } else {
+            for(Vertex<T> v : getAllVertices()) {
+                if(v.equals(vertex)) { return v;}
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get a list of successors of the given node if the given vertex is in the graph
+     * @param vertex given vertex
+     * @return list of successors
+     */
+    public List<Vertex<T>> getSuccessors(Vertex<T> vertex) {
+        List<Vertex<T>> succs = new LinkedList<>();
+        for(Edge<T> e : getVertexInGraph(vertex).getNeighbors()) {
+            if(e.getStart().equals(vertex)) {
+                succs.add(e.getEnd());
+            } else if(e.getEnd().equals(vertex)) {
+                succs.add(e.getStart());
+            }
+        }
+        return succs;
+    }
+
+
+    /**
      * Get the goal vertex
      *
      * @return the goal vertex if one is set, null if no vertex has been set as
