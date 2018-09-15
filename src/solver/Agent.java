@@ -1,11 +1,14 @@
 package solver;
 
+import problem.Box;
 import problem.ProblemSpec;
 import problem.RobotConfig;
+import problem.StaticObstacle;
 import tester.Tester;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -57,10 +60,12 @@ public class Agent {
                 RobotConfig r = path.get(i);
                 System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
                         + r.getPos().getY() + ", " + r.getOrientation() + ")");
-                // Vince this is where s.getStaticObstSt() was returning null
-                p(s.getStaticObstSt());
                 RRT rrt = new RRT(s.getBoxes().get(0), r.getPos(), s.getMovingObst(), s.getStaticObstSt());
-                p("RRRT: " + rrt);
+                try {
+                    writeResult(rrt, r);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             System.out.println("No Solution");
@@ -80,6 +85,37 @@ public class Agent {
 
     }
 
+    /**
+     * Writes a solution to a file
+     * @param rrt the RRT to get data from
+     * @param r the RobotConfig with the robot's location
+     * @throws IOException if there is an error with the file
+     */
+    private static void writeResult(RRT rrt, RobotConfig r) throws IOException {
+        File f = new File("resultoutput.txt");
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+
+        // write the amount of primitive steps on the path
+        writer.write(rrt.getCoordPath().size());
+        writer.newLine();
+
+        // write the locations of the robot, boxes and obstacles
+        for (Point2D coord : rrt.getCoordPath()) {
+            // write the robot's configuation
+            writer.write(Double.toString(coord.getX()) + " ");
+            writer.write(Double.toString(coord.getY()) + " ");
+            writer.write(Double.toString(r.getOrientation()));
+
+            // write the boxes' coordinates
+            for (Box box : rrt.getBoxes()) {
+                writer.write(" " + box.getPos().getX());
+                writer.write(" " + box.getPos().getY());
+            }
+            writer.newLine();
+        }
+        writer.close();
+    }
 
     /**
      * Sample an random robot config uniformly

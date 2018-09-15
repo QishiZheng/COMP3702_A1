@@ -248,6 +248,13 @@ public class RRT {
         return coordPath;
     }
 
+    public List<Box> getBoxes() {
+        return this.moveableObstacle;
+    }
+
+    public List<StaticObstacle> getStaticObstacles() {
+        return this.staticObstacle;
+    }
 
     private class Node {
         // Class Variables //
