@@ -21,7 +21,7 @@ public class RRTTest {
         Box testBox = new MovingBox(testBoxPoint, 0.1);
 
         // Box Ending Point
-        Point2D goal = new Point2D.Double(0.5, 0.210);
+        Point2D goal = new Point2D.Double(0.8, 0.8);
 
         // Moveable Box Points
         Point2D testMoveBoxPoint = new Point2D.Double(0.25, 0.25);
