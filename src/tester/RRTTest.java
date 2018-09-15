@@ -19,26 +19,28 @@ public class RRTTest {
         double width = 0.002;
 
         // Box Starting Point
-        Point2D testBoxPoint = new Point2D.Double(0.5, 0.2);
+        Point2D testBoxPoint = new Point2D.Double(0.5, 0.200);
         Box testBox = new MovingBox(testBoxPoint, width);
 
         // Box Ending Point
-        Point2D goal = new Point2D.Double(0.5, 0.23);
+        Point2D goal = new Point2D.Double(0.5, 0.210);
 
         // Moveable Obstacles Points
-        Point2D testMoveBoxPoint = new Point2D.Double(0.5, 0.21);
+        Point2D testMoveBoxPoint = new Point2D.Double(0.5, 0.1);
         Box obstBox = new MovingBox(testMoveBoxPoint, width);
 
 
         List<Box> boxList = new ArrayList<>();
-        boxList.add(obstBox);
+        //boxList.add(obstBox);
 
         // Static Obstacles
-        StaticObstacle staticObst = new StaticObstacle(0.5, 0.8, 0.015, 0.015);
+        StaticObstacle staticObst = new StaticObstacle(0, 0.205, 0.499, 0.001);
+        StaticObstacle staticObst2 = new StaticObstacle(0.501, 0.205, 0.499, 0.001);
 
 
         List<StaticObstacle> staticObstacleList = new ArrayList<>();
         staticObstacleList.add(staticObst);
+        staticObstacleList.add(staticObst2);
 
         // End Configuration //
 
