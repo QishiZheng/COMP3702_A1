@@ -74,10 +74,6 @@ public abstract class Box {
 		return (Rectangle2D) rect.clone();
 	}
 
-	public void setRect(Point2D point) {
-		rect.setRect(point.getX(), point.getY(), width, width);
-	}
-
 	/**
 	 * Returns a String representation of the box.
 	 *

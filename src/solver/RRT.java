@@ -5,6 +5,8 @@ import problem.MovingBox;
 import problem.StaticObstacle;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -17,114 +19,151 @@ public class RRT {
     private final double STEP_SIZE = 0.001;
     private List<Box> moveableObstacle;
     private List<StaticObstacle> staticObstacle;
-    private Box currBox;
-    private Point2D currPos;
-    private Point2D goal;
-    private LinkedList<Node> nodePath;
+    private Node start;
+    private Node end;
+    private double width;
+    private LinkedList<Point2D> coordPath;
+    private List<Node> startList = new ArrayList<>();
+    private List<Node> endList = new ArrayList<>();
     private List<Node> allNodes = new ArrayList<>();
+    private DecimalFormat df = new DecimalFormat("0.###");
 
     // Constructors //
 
     /**
      * The constructor of RRT.
-     * @param initState the current state
-     * @param currBox the box to be path planned
-     * @param goal the goal where the box has to be moved to
+     * @param currBox the box to be path planned (bottom left aligned coord)
+     * @param goal the goal where the box has to be moved to (bottom left aligned coord)
+     * @param moveableObstacle list of moveableObstacles, include moving boxes and moving obstacles
+     * @param staticObstacle list of staticObstacle
      */
-    public RRT(State initState, MovingBox currBox, Point2D goal) {
-        this.currBox = currBox;
-        this.currPos = currBox.getPos();
-        this.goal = goal;
-        this.moveableObstacle = initState.getBoxes();
-        moveableObstacle.addAll(initState.getMovingObst());
-        this.staticObstacle = initState.getStaticObstSt();
+    public RRT(Box currBox, Point2D goal, List<Box> moveableObstacle
+            , List<StaticObstacle> staticObstacle) {
+        start = new Node(currBox.getPos());
+        end = new Node(goal);
+        width = currBox.getWidth();
+        this.moveableObstacle = moveableObstacle;
+        this.staticObstacle = staticObstacle;
 
-        // Remove currBox from moveableObstacle
-        moveableObstacle.remove(this.currBox);
-        this.setNodePath();
+        this.setCoordPath();
     }
 
     // Methods //
-    public void setNodePath() {
-        Node start = new Node(currPos);
-        Node end = new Node(goal);
-        allNodes.add(start);
-        nodePath = pathSearch(start);
+    private void setCoordPath() {
+        addToList(startList, start);
+        addToList(endList, end);
+        coordPath = pathSearch(startList, endList);
     }
 
-    public LinkedList<Node> pathSearch(Node start) {
+    private LinkedList<Point2D> pathSearch(List<Node> list1, List<Node> list2) {
         // Make random Node
         Random random = new Random();
-        Point2D randPoint = new Point2D.Double(random.nextInt(1000) / 1000.0
-                , random.nextInt(1000) / 1000.0);
+        Point2D randPoint = new Point2D.Double(
+                Double.parseDouble(df.format(random.nextInt(1000) * 0.001))
+                , Double.parseDouble(df.format(random.nextInt(1000) * 0.001)));
+        ///// System.out.println("random at X: " + randPoint.getX() + ", Y: " + randPoint.getY());
         Node randNode = new Node(randPoint);
 
         // Find the nearest Node
-        Node nearNode = randNode.nearestNode(allNodes);
+        Node nearNode = randNode.nearestNode(list1);
 
-        // Make new Node a STEP closer towards randNode from nearNode
-        // STEP on the axis that is furtherest away from nearNode
+        // Make new Node a STEP_SIZE closer towards randNode from nearNode
+        // step on the axis that is furtherest away from nearNode
         Node newNode;
         double xDist = randNode.getX() - nearNode.getX();
         double yDist = randNode.getY() - nearNode.getY();
         Point2D point;
+        String direction;
         if (Math.abs(xDist) >= Math.abs(yDist)) {
             if (xDist > 0) {
-                point = new Point2D.Double(nearNode.getX() + STEP_SIZE, nearNode.getY());
+                point = new Point2D.Double(
+                        Double.parseDouble(df.format(nearNode.getX() + STEP_SIZE))
+                        , Double.parseDouble(df.format(nearNode.getY())));
+                direction = "r";
             } else {
-                point = new Point2D.Double(nearNode.getX() - STEP_SIZE, nearNode.getY());
+                point = new Point2D.Double(
+                        Double.parseDouble(df.format(nearNode.getX() - STEP_SIZE))
+                        , Double.parseDouble(df.format(nearNode.getY())));
+                direction = "l";
             }
         } else {
             if (yDist > 0) {
-                point = new Point2D.Double(nearNode.getX(), nearNode.getY() + STEP_SIZE);
+                point = new Point2D.Double(
+                        Double.parseDouble(df.format(nearNode.getX()))
+                        , Double.parseDouble(df.format(nearNode.getY() + STEP_SIZE)));
+                direction = "d";
             } else {
-                point = new Point2D.Double(nearNode.getX(), nearNode.getY() - STEP_SIZE);
+                point = new Point2D.Double(
+                        Double.parseDouble(df.format(nearNode.getX()))
+                        , Double.parseDouble(df.format(nearNode.getY() - STEP_SIZE)));
+                direction = "u";
             }
         }
         newNode = new Node(point);
+        newNode.setParent(nearNode);
+        newNode.setDirection(direction);
 
-        // Check if newNode pos is not blocked by Moveable Obstacles
-        currBox.setRect(newNode.getCurrPos());
+        // Check if newNode pos is not blocked by Moveable Obstacles and robot has enough room to move
+        Box testBox = new MovingBox(newNode.getCurrPos(), width);
         for (Box obst : moveableObstacle) {
-            if (currBox.getRect().intersects(obst.getRect().getX(), obst.getRect().getY()
+            if (testBox.getRect().intersects(obst.getRect().getX(), obst.getRect().getY()
                     , obst.getWidth(), obst.getWidth())) {
-                // currBox intersects, so skip discard newNode, start a next random search
-                return pathSearch(start);
+                // currBox intersects, so discard newNode, start a next random search
+                return pathSearch(list1, list2);
+            } else if (notEnoughRoom(testBox.getRect(), obst.getRect(), nearNode, newNode)) {
+                return pathSearch(list1, list2);
             }
         }
         // Check if newNode pos is not blocked by Static Obstacles
         for (StaticObstacle obst : staticObstacle) {
-            if (currBox.getRect().intersects(obst.getRect().getX(), obst.getRect().getY()
+            if (testBox.getRect().intersects(obst.getRect().getX(), obst.getRect().getY()
                     , obst.getRect().getWidth(), obst.getRect().getWidth())) {
                 // currBox intersects, so skip discard newNode, start a next random search
-                return pathSearch(start);
+                return pathSearch(list1, list2);
+            } else if (notEnoughRoom(testBox.getRect(), obst.getRect(), nearNode, newNode)) {
+                return pathSearch(list1, list2);
             }
         }
-        // TODO: Check if there is enough room for robot to move around the box
+        // Check if newNode already exists in allNodes
+        for (Node n : allNodes) {
+            if (n.equals(newNode)) {
+                return pathSearch(list1, list2);
+            }
+        }
 
+        // All constraints has been checked and passed, add newNode to list of all nodes
+        addToList(list1, newNode);
+        System.out.println("Added point: " + newNode.getX() + ", " + newNode.getY());
 
-
-        // All constraints has been checked and passed, add newNode to parent
-        newNode.setParent(nearNode);
-        allNodes.add(newNode);
-
-        // check if newNode is a STEP next to goalNode, if it is, return a path
-        if (newNode.nextToGoal()) {
-            Node end = new Node(goal);
-            end.setParent(newNode);
-
-            // Backtrack from end Node, trace the path back to root
-            Node nodeCheck = end;
-            LinkedList<Node> path = new LinkedList<>();
+        // check if newNode is a STEP next to nodes in list2, if it is, return a path
+        Node adjNode = newNode.nextToList(list2);
+        if (adjNode != null) {
+            // Backtrack from newNode, trace the path back to root
+            Node nodeCheck = newNode;
+            LinkedList<Point2D> path1 = new LinkedList<>();
             do {
-                path.addFirst(nodeCheck);
+                path1.addFirst(nodeCheck.currPos);
                 nodeCheck = nodeCheck.getParent();
             } while (nodeCheck != null);
-            return path;
+
+            // Backtrack from adjNode, trace the path back to root
+            nodeCheck = adjNode;
+            LinkedList<Point2D> path2 = new LinkedList<>();
+            do {
+                path2.addLast(nodeCheck.currPos);
+                nodeCheck = nodeCheck.getParent();
+            } while (nodeCheck != null);
+            path1.addAll(path2);
+
+            // Check if the list is back to front
+            if (path1.getFirst().equals(end.currPos)) {
+                Collections.reverse(path1);
+            }
+            return path1;
 
         } else if (allNodes.size() < MAX_NODES){
-            // start another search
-            return pathSearch(start);
+            // start another search, switch list around
+            return pathSearch(list2, list1);
         }
 
         // if this code is reached, it means allNode size is more than
@@ -132,8 +171,63 @@ public class RRT {
         return null;
     }
 
-    public LinkedList<Node> getNodePath() {
-        return nodePath;
+    private void addToList(List<Node> list, Node node) {
+        list.add(node);
+        allNodes.add(node);
+    }
+
+    private boolean notEnoughRoom(Rectangle2D box, Rectangle2D obst, Node parent, Node child) {
+        // Case 1: Robot switch from left side of box to bot side or vice versa,
+        if (parent.getDirection() == null) {
+            return false;
+        } else if ((parent.getDirection().equals("r") && child.getDirection().equals("u"))
+                || (parent.getDirection().equals("u") && child.getDirection().equals("r"))) {
+            Point2D leftBoxPoint = new Point2D.Double((box.getX() - (box.getWidth() / 2)), box.getCenterY());
+            Point2D downBoxPoint = new Point2D.Double(box.getX(), (box.getY() + box.getWidth()));
+            Box leftBox = new MovingBox(leftBoxPoint, (box.getWidth() / 2));
+            Box downBox = new MovingBox(downBoxPoint, (box.getWidth() / 2));
+
+            return (leftBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth())
+                    || downBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth()));
+
+          // Case 2: Robot switch from left side of box to top side or vice versa.
+        } else if ((parent.getDirection().equals("r") && child.getDirection().equals("d"))
+                || (parent.getDirection().equals("d") && child.getDirection().equals("r"))) {
+            Point2D leftBoxPoint = new Point2D.Double((box.getX() - (box.getWidth() / 2)), box.getY());
+            Point2D upBoxPoint = new Point2D.Double(box.getX(), (box.getY() - (box.getWidth() / 2)));
+            Box leftBox = new MovingBox(leftBoxPoint, (box.getWidth() / 2));
+            Box upBox = new MovingBox(upBoxPoint, (box.getWidth() / 2));
+
+            return (leftBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth())
+                    || upBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth()));
+          // Case 3: Robot switch from right side of box to bot side or vice versa.
+        } else if ((parent.getDirection().equals("l") && child.getDirection().equals("u"))
+                || (parent.getDirection().equals("u") && child.getDirection().equals("l"))) {
+            Point2D rightBoxPoint = new Point2D.Double((box.getX() + box.getWidth()), box.getCenterY());
+            Point2D downBoxPoint = new Point2D.Double(box.getCenterX(), (box.getY() + box.getWidth()));
+            Box rightBox = new MovingBox(rightBoxPoint, (box.getWidth() / 2));
+            Box downBox = new MovingBox(downBoxPoint, (box.getWidth() / 2));
+
+            return rightBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth())
+                    || downBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth());
+          // Case 4: Robot switch frm right side of box to top side or vice versa.
+        } else if ((parent.getDirection().equals("l") && child.getDirection().equals("d"))
+                || (parent.getDirection().equals("d") && child.getDirection().equals("l"))) {
+            Point2D rightBoxPoint = new Point2D.Double((box.getX() + box.getWidth()), box.getY());
+            Point2D upBoxPoint = new Point2D.Double(box.getCenterX(), (box.getY() - box.getWidth()));
+            Box rightBox = new MovingBox(rightBoxPoint, (box.getWidth() / 2));
+            Box upBox = new MovingBox(upBoxPoint, (box.getWidth() / 2));
+
+            return rightBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth())
+                    || upBox.getRect().intersects(obst.getX(), obst.getY(), obst.getWidth(), obst.getWidth());
+          // Case 5: robot not switching sides
+        } else {
+            return false;
+        }
+    }
+
+    public LinkedList<Point2D> getCoordPath() {
+        return coordPath;
     }
 
 
@@ -142,60 +236,82 @@ public class RRT {
         private Point2D currPos;
         private double xPos;
         private double yPos;
+        private String direction = null; // Only the root node will have null direction
         private Node parent = null; // Only the root node will have null parent
 
         // Constructors //
-        public Node(Point2D pos) {
+        private Node(Point2D pos) {
             currPos = pos;
             xPos = pos.getX();
             yPos = pos.getY();
         }
 
         // Methods //
-        public Point2D getCurrPos() {
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof Node) {
+                Node n = (Node) o;
+                return n.getCurrPos().equals((currPos));
+            }
+            return false;
+        }
+
+        private Point2D getCurrPos() {
             return currPos;
         }
 
-        public double getX() {
+        private double getX() {
             return xPos;
         }
 
-        public double getY() {
+        private double getY() {
             return yPos;
         }
 
-        public Node nearestNode(List<Node> list) {
-            double distance = 1;
+        private Node nearestNode(List<Node> list) {
+            double distance = 2000; // The maximum distance between 2 points in a 1x1 grid is sqrt(2)
             Node node = null;
             for (Node n : list) {
-                Double length = n.getY() - this.getY();
-                Double width = n.getX() - this.getY();
-                Double hypot = Math.hypot(length, width);
-                if (hypot < distance) {
-                    distance = hypot;
+                Double length = Math.abs(n.getY() - this.getY());
+                Double width = Math.abs(n.getX() - this.getY());
+                if ((length + width) < distance) {
+                    distance = (length + width);
                     node = n;
                 }
             }
             return node;
         }
 
-        public boolean nextToGoal() {
-            if (xPos + STEP_SIZE == goal.getX() || xPos - STEP_SIZE == goal.getX()
-            || yPos + STEP_SIZE == goal.getY() || yPos -  STEP_SIZE == goal.getY()) {
-                return true;
-            } else {
-                return false;
+        private Node nextToList(List<Node> list) {
+            for (Node n : list) {
+                if ((xPos + STEP_SIZE == n.getX() && yPos == n.getY())
+                        || (xPos - STEP_SIZE == n.getX() && yPos == n.getY())
+                        || (yPos + STEP_SIZE == n.getY() && xPos == n.getX())
+                        || (yPos - STEP_SIZE == n.getY() && xPos == n.getX())) {
+                    return n;
+                }
             }
+            return null;
         }
 
-        public void setParent(Node node) {
+        private void setParent(Node node) {
             parent = node;
         }
 
-        public Node getParent() {
+        private Node getParent() {
             return parent;
         }
 
+        private String getDirection() {
+            return direction;
+        }
+
+        private void setDirection(String direction) {
+            if (this.direction == null) {
+                this.direction = direction;
+            }
+        }
     }
 
 }
