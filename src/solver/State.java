@@ -34,7 +34,7 @@ public class State {
         this.robotState = ps.getInitialRobotConfig();
         this.boxState = ps.getMovingBoxes();
         this.movingObstState = ps.getMovingObstacles();
-        //staticObstState = ps.getStaticObstacles();
+        this.staticObstState = ps.getStaticObstacles();
     }
 
 
