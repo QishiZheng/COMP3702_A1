@@ -23,4 +23,14 @@ public class MovingBox extends Box {
     public MovingBox(Point2D pos, double width) {
         super(pos, width);
     }
+
+	/**
+	 * String representation of box coordinates
+	 * @return String representation of box coordinates
+	 */
+	@Override
+	public String toString() {
+		return this.getPos().getX() + " "
+				+ this.getPos().getY() + " ";
+	}
 }

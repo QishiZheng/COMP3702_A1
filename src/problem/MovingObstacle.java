@@ -23,4 +23,14 @@ public class MovingObstacle extends Box {
     public MovingObstacle(Point2D pos, double width) {
         super(pos, width);
     }
+
+	/**
+	 * String representation of movingObstacles coordinates
+	 * @return String representation of movingObstacles coordinates
+	 */
+	@Override
+	public String toString() {
+		return this.getPos().getX() + " "
+				+ this.getPos().getY();
+	}
 }

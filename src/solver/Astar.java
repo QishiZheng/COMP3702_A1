@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+
 /**
  * Astart search algorithm for searching shortest path in the state graph.
  */
@@ -521,6 +522,7 @@ public class Astar {
             }
 
             return false;
+
         }
     }
 }
