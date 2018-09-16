@@ -13,7 +13,7 @@ public class AstarTest {
         // Configure here //
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input1.txt");
+            ps.loadProblem("input3.txt");
         } catch (IOException ioe) {
             System.out.println("FAILED: Invalid problem file");
             System.out.println(ioe.getMessage());

@@ -16,13 +16,13 @@ public class Astar {
     // Class Variables //
     private final double STEP_SIZE = Tester.MAX_BASE_STEP;
     private final DecimalFormat DECIMAL = new DecimalFormat("0.###");
-    private List<Point2D> goalList;
+    private List<Point2D> goalList = new ArrayList<>();
     private List<String> obstMovement = new ArrayList<>();
-    private List<Box> mvBox;
+    private List<Box> mvBox = new ArrayList<>();
     private List<Box> movedBox =  new ArrayList<>();
-    private List<Box> mvObst;
+    private List<Box> mvObst = new ArrayList<>();
     private List<Box> movedObst = new ArrayList<>();
-    private List<StaticObstacle> staticObst;
+    private List<StaticObstacle> staticObst = new ArrayList<>();
     private Point2D start;
     private Point2D end;
     private double width;
@@ -34,23 +34,55 @@ public class Astar {
 
     // Constructors //
     public Astar(ProblemSpec ps) {
-        mvBox = ps.getMovingBoxes();
-        mvObst = ps.getMovingObstacles();
-        staticObst = ps.getStaticObstacles();
-        goalList = ps.getMovingBoxEndPositions();
+        setMvBox(ps.getMovingBoxes());
+        setMvObst(ps.getMovingObstacles());
+        setStaticObst(ps.getStaticObstacles());
+        setGoalList(ps.getMovingBoxEndPositions());
         reloadObstMovement();
         setPath();
     }
 
     // Methods //
+    private void setMvBox(List<Box> mvBoxList) {
+        for (Box box : mvBoxList) {
+            Point2D point = new Point2D.Double(formatDouble(box.getPos().getX()), formatDouble(box.getPos().getY()));
+            Box parsedBox = new MovingBox(point, formatDouble(box.getWidth()));
+            mvBox.add(parsedBox);
+        }
+    }
+
+    private void setMvObst(List<Box> mvObstList) {
+        for (Box obst : mvObstList) {
+            Point2D point = new Point2D.Double(formatDouble(obst.getPos().getX()), formatDouble(obst.getPos().getY()));
+            Box parsedBox = new MovingObstacle(point, formatDouble(obst.getWidth()));
+            mvObst.add(parsedBox);
+        }
+    }
+
+    private void setStaticObst(List<StaticObstacle> staticObstList) {
+        for (StaticObstacle so : staticObstList) {
+            StaticObstacle parsedBox = new StaticObstacle(formatDouble(so.getRect().getX())
+                    , formatDouble(so.getRect().getY()), formatDouble(so.getRect().getWidth())
+                    , formatDouble(so.getRect().getHeight()));
+            staticObst.add(parsedBox);
+        }
+    }
+
+    private void setGoalList(List<Point2D> list) {
+        for (Point2D point : list) {
+            Point2D parsedPoint = new Point2D.Double(formatDouble(point.getX()), formatDouble(point.getY()));
+            goalList.add(parsedPoint);
+        }
+    }
+
     private void initBoxData() {
         Box box = mvBox.remove(0);
-
+        System.out.println("Box selected: " + box.getPos().toString());
         start = box.getPos();
         width = box.getWidth();
         robotWidth = width;
-
         end = goalList.remove(0);
+        System.out.println("Box goal: " + end.toString());
 
         Node root = new Node(start, null);
         opened.add(root);
@@ -58,7 +90,6 @@ public class Astar {
 
     private void initObstData() {
         Box obst = mvObst.remove(0);
-
         start = obst.getPos();
         width = obst.getWidth();
         end = chooseDir();
@@ -105,9 +136,11 @@ public class Astar {
             LinkedList<Point2D> path = pathSearch();
             mvBoxPaths.add(path);
             if (path != null) {
+                System.out.println("path exists");
                 updateMovedBox(true);
             } else {
                 updateMovedBox(false);
+                System.out.println("path does not exist");
 
                 // move all boxes by a direction
                 while (!mvObst.isEmpty()) {
@@ -195,16 +228,15 @@ public class Astar {
                         nodeCheck = nodeCheck.getParent();
                     } while (nodeCheck != null);
                     return path;
-                } else if (opened.contains(n) || closed.contains(n) || isMvBox(n.currBox)
-                        || isMvObst(n.currBox) || isStaticObst(n.currBox) || isOutOfBounds(n.currBox)
-                        || n.hasNoRoom()) {
-                    ////System.out.println("node skipped: " + n.getCurrPos().toString());
-                    continue;
+                } else if (!opened.contains(n) && !closed.contains(n) && !isMvBox(n.currBox)
+                        && !isMvObst(n.currBox) && !isStaticObst(n.currBox) && !isOutOfBounds(n.currBox)
+                        && !n.hasNoRoom()) {
+                    ////System.out.println("child: " + n.getCurrPos().toString());
+                    ////System.out.println("in closed: " + n.inClosed());
+                    ////System.out.println("added to opened: " + n.getCurrPos().toString());
+                    opened.add(n);
                 }
-                ////System.out.println("child: " + n.getCurrPos().toString());
-                ////System.out.println("in closed: " + n.inClosed());
-                ////System.out.println("added to opened: " + n.getCurrPos().toString());
-                opened.add(n);
+                ////System.out.println("node skipped: " + n.getCurrPos().toString());
             }
             closed.add(q);
             ////System.out.println("node added to closed: " + q.getCurrPos().toString());
@@ -220,7 +252,7 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(mb.getRect().getX()), formatDouble(mb.getRect().getY())
                     , formatDouble(mb.getWidth()), formatDouble(mb.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
-                ////System.out.println("Moving Box at: " + currBox.getPos().toString());
+                System.out.println("Moving Box at: " + currBox.getPos().toString());
                 return true;
             }
         }
@@ -229,7 +261,7 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(mb.getRect().getX()), formatDouble(mb.getRect().getY())
                     , formatDouble(mb.getWidth()), formatDouble(mb.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
-                ////System.out.println("Moving Box at: " + currBox.getPos().toString());
+                System.out.println("Moved Box at: " + currBox.getPos().toString());
                 return true;
             }
         }
@@ -241,6 +273,7 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(mo.getRect().getX()), formatDouble(mo.getRect().getY())
                     , formatDouble(mo.getWidth()), formatDouble(mo.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
+                System.out.println("Moving Obst at: " + currBox.getPos().toString());
                 return true;
             }
         }
@@ -252,6 +285,7 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(so.getRect().getX()), formatDouble(so.getRect().getY())
                     , formatDouble(so.getRect().getWidth()), formatDouble(so.getRect().getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
+                System.out.println("Static Obst at: " + currBox.getPos().toString());
                 return true;
             }
         }
@@ -259,8 +293,12 @@ public class Astar {
     }
 
     private boolean isOutOfBounds(Box currBox) {
-        return ((formatDouble(currBox.getRect().getMaxX()) > 1) || (formatDouble(currBox.getRect().getMaxY()) > 1)
-                || (formatDouble(currBox.getRect().getMinX()) < 0) || (formatDouble(currBox.getRect().getMinY()) < 0));
+        if ((formatDouble(currBox.getRect().getMaxX()) > 1) || (formatDouble(currBox.getRect().getMaxY()) > 1)
+                || (formatDouble(currBox.getRect().getMinX()) < 0) || (formatDouble(currBox.getRect().getMinY()) < 0)) {
+            System.out.println("Out of bounds at: " + currBox.getPos().toString());
+            return true;
+        }
+        return false;
     }
 
     public List<LinkedList<Point2D>> getMvBoxPaths() {
@@ -360,14 +398,14 @@ public class Astar {
 
         private void setChildren() {
             // order = [u, d, l ,r]
-            Point2D u = new Point2D.Double(currPos.getX()
+            Point2D u = new Point2D.Double(formatDouble(currPos.getX())
                     , formatDouble(currPos.getY() - STEP_SIZE));
-            Point2D d = new Point2D.Double(currPos.getX()
+            Point2D d = new Point2D.Double(formatDouble(currPos.getX())
                     , formatDouble(currPos.getY() + STEP_SIZE));
             Point2D l = new Point2D.Double(formatDouble(currPos.getX() - STEP_SIZE)
-                    , currPos.getY());
+                    , formatDouble(currPos.getY()));
             Point2D r = new Point2D.Double(formatDouble(currPos.getX() + STEP_SIZE)
-                    , currPos.getY());
+                    , formatDouble(currPos.getY()));
             children.add(u);
             children.add(d);
             children.add(l);
@@ -428,45 +466,45 @@ public class Astar {
                 return false;
             } else if ((parent.getDirection().equals("r") && direction.equals("u"))
                     || (parent.getDirection().equals("u") && direction.equals("r"))) {
-                Point2D leftBoxPoint = new Point2D.Double((currBox.getRect().getX() - (width / 2))
-                        , currBox.getRect().getCenterY());
-                Point2D downBoxPoint = new Point2D.Double(currBox.getRect().getX()
-                        , (currBox.getRect().getY() + width));
-                Box leftBox = new MovingBox(leftBoxPoint, (robotWidth / 2));
-                Box downBox = new MovingBox(downBoxPoint, (robotWidth / 2));
+                Point2D leftBoxPoint = new Point2D.Double(formatDouble((currBox.getRect().getX() - (width / 2)))
+                        , formatDouble(currBox.getRect().getCenterY()));
+                Point2D downBoxPoint = new Point2D.Double(formatDouble(currBox.getRect().getX())
+                        , formatDouble((currBox.getRect().getY() + width)));
+                Box leftBox = new MovingBox(leftBoxPoint, formatDouble((robotWidth / 2)));
+                Box downBox = new MovingBox(downBoxPoint, formatDouble((robotWidth / 2)));
 
                 return (isMvBox(leftBox) || isMvObst(leftBox) || isStaticObst(leftBox) || isOutOfBounds(leftBox)
                         || isMvBox(downBox) || isMvObst(downBox) || isStaticObst(downBox) || isOutOfBounds(downBox));
             } else if ((parent.getDirection().equals("r") && direction.equals("d"))
                     || (parent.getDirection().equals("d") && direction.equals("r"))) {
-                Point2D leftBoxPoint = new Point2D.Double((currBox.getRect().getX() - (width / 2))
-                        , currBox.getRect().getY());
-                Point2D upBoxPoint = new Point2D.Double(currBox.getRect().getX()
-                        , (currBox.getRect().getY() - (width / 2)));
-                Box leftBox = new MovingBox(leftBoxPoint, (robotWidth / 2));
-                Box upBox = new MovingBox(upBoxPoint, (robotWidth / 2));
+                Point2D leftBoxPoint = new Point2D.Double(formatDouble((currBox.getRect().getX() - (width / 2)))
+                        , formatDouble(currBox.getRect().getY()));
+                Point2D upBoxPoint = new Point2D.Double(formatDouble(currBox.getRect().getX())
+                        , formatDouble((currBox.getRect().getY() - (width / 2))));
+                Box leftBox = new MovingBox(leftBoxPoint, formatDouble((robotWidth / 2)));
+                Box upBox = new MovingBox(upBoxPoint, formatDouble((robotWidth / 2)));
 
                 return (isMvBox(leftBox) || isMvObst(leftBox) || isStaticObst(leftBox) || isOutOfBounds(leftBox)
                         || isMvBox(upBox) || isMvObst(upBox) || isStaticObst(upBox) || isOutOfBounds(upBox));
             } else if ((parent.getDirection().equals("l") && direction.equals("u"))
                     || (parent.getDirection().equals("u") && direction.equals("l"))) {
-                Point2D rightBoxPoint = new Point2D.Double((currBox.getRect().getX() + width)
-                        , currBox.getRect().getCenterY());
-                Point2D downBoxPoint = new Point2D.Double(currBox.getRect().getCenterX()
-                        , (currBox.getRect().getY() + width));
-                Box rightBox = new MovingBox(rightBoxPoint, (robotWidth / 2));
-                Box downBox = new MovingBox(downBoxPoint, (robotWidth / 2));
+                Point2D rightBoxPoint = new Point2D.Double(formatDouble((currBox.getRect().getX() + width))
+                        , formatDouble(currBox.getRect().getCenterY()));
+                Point2D downBoxPoint = new Point2D.Double(formatDouble(currBox.getRect().getCenterX())
+                        , formatDouble((currBox.getRect().getY() + width)));
+                Box rightBox = new MovingBox(rightBoxPoint, formatDouble((robotWidth / 2)));
+                Box downBox = new MovingBox(downBoxPoint, formatDouble((robotWidth / 2)));
 
                 return (isMvBox(rightBox) || isMvObst(rightBox) || isStaticObst(rightBox) || isOutOfBounds(rightBox)
                         || isMvBox(downBox) || isMvObst(downBox) || isStaticObst(downBox) || isOutOfBounds(downBox));
             } else if ((parent.getDirection().equals("l") && direction.equals("d"))
                     || (parent.getDirection().equals("d") && direction.equals("l"))) {
-                Point2D rightBoxPoint = new Point2D.Double((currBox.getRect().getX() + width)
-                        , currBox.getRect().getY());
-                Point2D upBoxPoint = new Point2D.Double(currBox.getRect().getCenterX()
-                        , (currBox.getRect().getY() - width));
-                Box rightBox = new MovingBox(rightBoxPoint, (robotWidth / 2));
-                Box upBox = new MovingBox(upBoxPoint, (robotWidth / 2));
+                Point2D rightBoxPoint = new Point2D.Double(formatDouble((currBox.getRect().getX() + width))
+                        , formatDouble(currBox.getRect().getY()));
+                Point2D upBoxPoint = new Point2D.Double(formatDouble(currBox.getRect().getCenterX())
+                        , formatDouble((currBox.getRect().getY() - width)));
+                Box rightBox = new MovingBox(rightBoxPoint, formatDouble((robotWidth / 2)));
+                Box upBox = new MovingBox(upBoxPoint, formatDouble((robotWidth / 2)));
 
                 return (isMvBox(rightBox) || isMvObst(rightBox) || isStaticObst(rightBox) || isOutOfBounds(rightBox)
                         || isMvBox(upBox) || isMvObst(upBox) || isStaticObst(upBox) || isOutOfBounds(upBox));
