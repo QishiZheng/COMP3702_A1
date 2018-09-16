@@ -46,6 +46,11 @@ public class State {
         this.movingObstState = movingObst;
     }
 
+
+    public void setProblemSpec(ProblemSpec ps) {
+        this.problemSpec = ps;
+    }
+
     /**
      * Get the robot config state
      * @return robot config state
@@ -73,7 +78,7 @@ public class State {
     /**
      * TODO: TO BE IMPLEMENTED
      * Get the cost from current state to given state s
-     * @param s given goal state
+     * @param rc given goal state
      * @return cost cost from current state to given state s
      */
     public boolean robotCollisionFree(RobotConfig rc) {
