@@ -242,7 +242,7 @@ public class Astar {
             rc = new RobotConfig(point, angle);
         } else {
             Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX())
-                    , formatDouble(node.getCurrPos().getY() - (width / 2)));
+                    , formatDouble(node.getCurrPos().getY() + (width / 2)));
             double angle = formatDouble(Math.PI / 2);
             rc = new RobotConfig(point, angle);
         }
