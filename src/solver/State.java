@@ -13,7 +13,7 @@ import java.util.List;
 public class State {
     //state of robot
     private RobotConfig robotState;
-    //state of boxes
+    //state of moving boxes
     private List<Box> boxState;
     //state of moving obstacles
     private List<Box> movingObstState;
@@ -121,6 +121,29 @@ public class State {
         return false;
     }
 
+    /**
+     * String representation of State, for writing to the output solution file
+     * @return string for writing into output file
+     */
+    @Override
+    public String toString() {
+        String state = "";
+        //robot config
+        state += this.getRobot();
+        //moving boxes coords
+        for(Box mb : this.getBoxes()) {
+            state += (mb.getPos().getX() + mb.getWidth()/2)+ " ";
+            state += (mb.getPos().getY() + mb.getWidth()/2) + " ";
+        }
+
+        //moving obst coords
+        for(Box mo : this.getMovingObst()) {
+            state += (mo.getPos().getX() + mo.getWidth()/2)+ " ";
+            state += (mo.getPos().getY() + mo.getWidth()/2);
+        }
+
+        return state;
+    }
 
     /**
      * Get the first point of the robot
