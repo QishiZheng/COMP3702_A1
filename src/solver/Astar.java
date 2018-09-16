@@ -289,7 +289,7 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(so.getRect().getX()), formatDouble(so.getRect().getY())
                     , formatDouble(so.getRect().getWidth()), formatDouble(so.getRect().getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
-                System.out.println("Static Obst at: " + currBox.getPos().toString());
+                ////System.out.println("Static Obst at: " + currBox.getPos().toString());
                 return true;
             }
         }
