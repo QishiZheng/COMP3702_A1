@@ -181,16 +181,17 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(mb.getRect().getX()), formatDouble(mb.getRect().getY())
                     , formatDouble(mb.getWidth()), formatDouble(mb.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
-                System.out.println("Moving Box at: " + currBox.getPos().toString());
+                ////System.out.println("Moving Box at: " + currBox.getPos().toString());
                 return true;
             }
         }
+
         // Check the movedBox list
         for (Box mb : movedBox) {
             if (currBox.getRect().intersects(formatDouble(mb.getRect().getX()), formatDouble(mb.getRect().getY())
                     , formatDouble(mb.getWidth()), formatDouble(mb.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
-                System.out.println("Moved Box at: " + currBox.getPos().toString());
+                ////System.out.println("Moved Box at: " + currBox.getPos().toString());
                 return true;
             }
         }
