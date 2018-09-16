@@ -69,15 +69,12 @@ public class State {
     public List<Box> getMovingObst() {
         return this.movingObstState;
     }
-
-
-
+    
     /**
-     * Check if given robot config has collision with all of the movable objects
-     * in this problem spec
-     * @param rc robot config
-     * @return true if has no collision
-     *
+     * TODO: TO BE IMPLEMENTED
+     * Get the cost from current state to given state s
+     * @param s given goal state
+     * @return cost cost from current state to given state s
      */
     public boolean robotCollisionFree(RobotConfig rc) {
         Tester ts = new Tester(problemSpec);
