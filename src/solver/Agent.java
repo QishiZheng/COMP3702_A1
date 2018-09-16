@@ -10,6 +10,7 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicStampedReference;
 
 /**
  * The search agent to solve the motion planning problem
@@ -38,6 +39,15 @@ public class Agent {
         Double robotLength = ps.getRobotWidth();
 
 
+        //TODO: GET THE PAHT OF MOVINGBOXES
+//        Astar astar = new Astar();
+
+
+
+
+
+
+        //TODO: TO BE REMOVED LATER,  KEEPING IT NOW ONLY FOR TESTING PURPOSE
         //get the initial robot config from problemSpec
         RobotConfig robotInit = ps.getInitialRobotConfig();
         System.out.println("Root robotConf: (" +robotInit.getPos().getX() + ", "
@@ -84,6 +94,13 @@ public class Agent {
         long searchTime = System.currentTimeMillis();
         System.out.println("Search Time Took "+(searchTime - consTime) + " ms");
 
+
+
+
+
+        /**
+         * Time taken for running the program
+         * */
         long endTime = System.currentTimeMillis();
         System.out.println("Total Time Took "+(endTime - startTime)/1000 + " s");
     }

@@ -24,7 +24,6 @@ public class State {
 
 
 
-
     /**
      * Constructs a state from a ProblemSpec
      * @param ps Given ProblemSpec for constructing state
