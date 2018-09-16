@@ -222,17 +222,17 @@ public class Astar {
         RobotConfig rc;
         if (dir == null) {
             Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
-                    , formatDouble(node.getCurrPos().getY()));
+                    , formatDouble(node.getCurrPos().getY() + width));
             double angle = 0;
             rc = new RobotConfig(point, angle);
         } else if ("u".equals(dir)) {
             Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
-                    , formatDouble(node.getCurrPos().getY()));
+                    , formatDouble(node.getCurrPos().getY() + width));
             double angle = 0;
             rc = new RobotConfig(point, angle);
         } else if ("d".equals(dir)) {
             Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
-                    , formatDouble(node.getCurrPos().getY() + width));
+                    , formatDouble(node.getCurrPos().getY()));
             double angle = 0;
             rc = new RobotConfig(point, angle);
         } else if ("l".equals(dir)) {

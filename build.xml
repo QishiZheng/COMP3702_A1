@@ -12,15 +12,15 @@
 
     <target name="jar" depends="compile">
         <mkdir dir="build/jar"/>
-        <jar destfile="build/jar/Main.jar" basedir="build/classes">
+        <jar destfile="build/jar/Agent.jar" basedir="build/classes">
             <manifest>
-                <attribute name="Main-Class" value="problem.Main"/>
+                <attribute name="Main-Class" value="solver.Agent"/>
             </manifest>
         </jar>
     </target>
 
-    <target name="run">
-        <java jar="build/jar/Main.jar" fork="true"/>
+    <target name="agent">
+        <java jar="build/jar/Agent.jar" fork="true"/>
     </target>
 
 </project>
