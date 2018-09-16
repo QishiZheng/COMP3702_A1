@@ -91,7 +91,7 @@ public class Astar {
                         nodeCheck = nodeCheck.getParent();
                     } while (nodeCheck != null);
                     return path;
-                } else if (n.lessFCostInOpened() || n.inClosed() || isMvBox(n.currBox)
+                } else if (opened.contains(n) || closed.contains(n) || isMvBox(n.currBox)
                         || isMvObst(n.currBox) || isStaticObst(n.currBox) || isOutOfBounds(n.currBox)
                         || n.hasNoRoom()) {
                     ////System.out.println("node skipped: " + n.getCurrPos().toString());
@@ -115,7 +115,7 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(mb.getRect().getX()), formatDouble(mb.getRect().getY())
                     , formatDouble(mb.getWidth()), formatDouble(mb.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
-                System.out.println("Moving Box at: " + currBox.getPos().toString());
+                ////System.out.println("Moving Box at: " + currBox.getPos().toString());
                 return true;
             }
         }
@@ -285,6 +285,7 @@ public class Astar {
             return direction;
         }
 
+        @Deprecated
         private boolean lessFCostInOpened() {
             for (Node n : opened) {
                 if (this.equals(n) && (n.getF() <= this.fCost)) {
@@ -294,6 +295,7 @@ public class Astar {
             return false;
         }
 
+        @Deprecated
         private boolean inClosed() {
             for (Node n : closed) {
                 if (this.equals(n)) {
