@@ -1,23 +1,24 @@
 package solver;
 
+import problem.Box;
 import problem.ProblemSpec;
 import problem.RobotConfig;
 import tester.Tester;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 
 /**
- * The search agent
+ * The search agent to solve the motion planning problem
  */
 public class Agent {
     private ProblemSpec ps;
 
     public void agent(ProblemSpec problem) {
-        ps = problem;
+        this.ps = problem;
     }
 
     public static void main(String[] args) {
@@ -30,29 +31,44 @@ public class Agent {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        //create a initial state from the problrmSpec
         State s = new State(ps);
-        RobotConfig r1 = new RobotConfig(new Point2D.Double(0.7, 0.7), 0.02);
-        System.out.println("Root robotConf: (" +r1.getPos().getX() + ", "
-                + r1.getPos().getY() + ", " + r1.getOrientation() + ")");
-        RobotConfig r2 = new RobotConfig(new Point2D.Double(0.1, 0.1), 0.02);        System.out.println("Goal robotConf: (" +r2.getPos().getX() + ", "
-                + r2.getPos().getY() + ", " + r2.getOrientation() + ")");
-        PRM prm = new PRM(ps, s, 2500, 25, r1, r2);
-        StateGraph sg = prm.buildGraph();
-        System.out.println("#Vertex: "+sg.numOfVertex());
+        //the length of robot
+        Double robotLength = ps.getRobotWidth();
 
-        //print out all vertices
-//        List<Vertex<RobotConfig>> vertices = new ArrayList<>(sg.getAllVertices());
-//        for(int i = 0; i < vertices.size(); i++) {
-//            System.out.println(vertices.get(i).toString() + "has #neighbors: " + vertices.get(i).getNumOfNeighbors());
-//        }
 
-        System.out.println("Num of edges that Root vertex has: " + sg.getRootVertex().getNumOfNeighbors());
-        System.out.println("Num of edges that Goal vertex has: " + sg.getGoalVertex().getNumOfNeighbors());
+        //get the initial robot config from problemSpec
+        RobotConfig robotInit = ps.getInitialRobotConfig();
+        System.out.println("Root robotConf: (" +robotInit.getPos().getX() + ", "
+                + robotInit.getPos().getY() + ", " + robotInit.getOrientation() + ")");
 
+        RobotConfig robotGoal = new RobotConfig(new Point2D.Double(0.3, 0.8), Math.PI/2);
+        if(!s.robotCollisionFree(robotGoal)) {
+            System.out.println("Goal in obstacle\n" + "***********************");
+        }
+
+        System.out.println("Goal robotConf: (" +robotGoal.getPos().getX() + ", "
+                + robotGoal.getPos().getY() + ", " + robotGoal.getOrientation() + ")");
+
+        PRM prm = new PRM(ps, s, 1000, 10, robotInit, robotGoal);
+
+        //StateGraph sg = prm.buildGraph();
+        HashMap<RobotConfig, Set<RobotConfig>> sg = prm.buildMap();
+//        System.out.println("#Vertex: "+sg.numOfVertex());
+        System.out.println("#Vertex: "+sg.keySet().size());
+
+
+        long consTime = System.currentTimeMillis();
+        System.out.println("Graph Construction Took "+(consTime - startTime)/1000 + " s");
+
+        System.out.println("Num of edges that Root vertex has: " + sg.get(prm.getInit()).size());
+        System.out.println("Num of edges that Goal vertex has: " + sg.get(prm.getGoal()).size());
 
         //check if the path exists
-        if(prm.BFS(sg) != null) {
-            List<RobotConfig> path = prm.BFS(sg);
+        if(prm.BFS(sg, robotInit,robotGoal) != null) {
+            System.out.println("Path for robotGoal:\n");
+            List<RobotConfig> path = prm.BFS(sg,robotInit,robotGoal);
             for(int i = 0; i < path.size(); i++) {
             RobotConfig r = path.get(i);
             System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
@@ -63,56 +79,37 @@ public class Agent {
         }
 
         //time taken
+        long searchTime = System.currentTimeMillis();
+        System.out.println("Search Time Took "+(searchTime - consTime) + " ms");
+
         long endTime = System.currentTimeMillis();
-        System.out.println("Took "+(endTime - startTime)/1000 + " s");
-
-        //List<RobotConfig> path = prm.searchPath(sg);
-
-//        for(int i = 0; i < path.size(); i++) {
-//            RobotConfig r = path.get(i);
-//            System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
-//                    + r.getPos().getY() + ", " + r.getOrientation() + ")");
-//        }
+        System.out.println("Total Time Took "+(endTime - startTime)/1000 + " s");
 
     }
+
 
 
     /**
-     * Sample an random robot config uniformly
-     * @return an random robot config
-     *
+     * Get the path from box a to box b at maximum of unit 0.001 per step
+     * @param a box a
+     * @param b box b
+     * @return a list of box the path from box a to box b
      */
-    private static RobotConfig randomRobotConfig() {
-        Point2D p = randomPoint();
-        Double angle = randomAngle();
-        return new RobotConfig(p, angle);
+    private List<Box> movingBoxPathBreakdown(Box a, Box b) {
+        List<Box> path = new LinkedList<>();
+
+        //TODO: BREAK THE MOVEMENT TO 0.001 UNIT EACH STEP
+
+        return path;
     }
 
+    private List<RobotConfig> robotPathBreakDonw(RobotConfig rc1, RobotConfig rc2) {
+        List<RobotConfig> path = new LinkedList<>();
 
-    /**
-     * Generate an random point with coords from 0 to 1
-     * @return an random point with coords from 0 to 1 inclusively, 0.001 unit
-     */
-    private static Point2D randomPoint() {
-        int xInt = new Random().nextInt(1000);
-        int yInt = new Random().nextInt(1000);
-        Double x = (Double)(xInt/1000.0);
-        Double y = (Double)(yInt/1000.0);
-        return new Point2D.Double(x, y);
+        //TODO: BREAK THE MOVEMENT TO 0.001 UNIT EACH STEP
+
+        return path;
     }
-
-    /**
-     * Generate an random angle range from 0 - pi
-     * @return an random angle range from 0 - pi inclusively, 0.001 unit
-     * TODO: MIGHT BE WRONG TO SAMPLE ANGLE LIKE THIS
-     */
-    private static Double randomAngle() {
-        Double rad = (Double)((new Random().nextInt(1001))/1000.0);
-        return rad * Math.PI;
-    }
-
-
-
 
 
 
