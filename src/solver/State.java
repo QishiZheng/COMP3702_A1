@@ -18,7 +18,6 @@ public class State {
     //state of moving obstacles
     private List<Box> movingObstState;
     //state of static obstacles
-    private List<StaticObstacle> staticObstState;
 
     private ProblemSpec problemSpec;
 
@@ -33,7 +32,6 @@ public class State {
         this.robotState = ps.getInitialRobotConfig();
         this.boxState = ps.getMovingBoxes();
         this.movingObstState = ps.getMovingObstacles();
-        this.staticObstState = ps.getStaticObstacles();
     }
 
 
@@ -43,11 +41,10 @@ public class State {
      * @param boxes a list of boxes
      * @param movingObst a list of moving obstacles
      */
-    public State(RobotConfig rc, List<Box> boxes, List<Box> movingObst, List<StaticObstacle> staticObst) {
+    public State(RobotConfig rc, List<Box> boxes, List<Box> movingObst) {
         this.robotState = rc;
         this.boxState = boxes;
         this.movingObstState = movingObst;
-        staticObstState = staticObst;
     }
 
     /**
@@ -74,18 +71,11 @@ public class State {
         return this.movingObstState;
     }
 
-    /** Get the static obstacles state
-     * @return a list of static obstacles
-     */
-    public List<StaticObstacle> getStaticObstSt() { return staticObstState; }
-
-
     /**
-     * Check if given robot config has collision with all of the movable objects
-     * in this problem spec
-     * @param rc robot config
-     * @return true if has no collision
-     *
+     * TODO: TO BE IMPLEMENTED
+     * Get the cost from current state to given state s
+     * @param s given goal state
+     * @return cost cost from current state to given state s
      */
     public boolean robotCollisionFree(RobotConfig rc) {
         Tester ts = new Tester(problemSpec);

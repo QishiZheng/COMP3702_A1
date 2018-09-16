@@ -29,7 +29,8 @@ public class Astar {
     private List<Node> opened = new ArrayList<>();
     private List<Node> closed = new ArrayList<>();
     private List<LinkedList<Point2D>> mvBoxPaths =  new ArrayList<>();
-    private List<LinkedList<Point2D>> robotPaths = new ArrayList<>();
+    private List<LinkedList<RobotConfig>> robotPaths = new ArrayList<>();
+    private List<List<List<Box>>> allBoxCoords = new ArrayList<>();
 
     // Constructors //
     public Astar(ProblemSpec ps) {
@@ -150,11 +151,33 @@ public class Astar {
                 if (n.getCurrPos().equals(end)) {
                     Node nodeCheck = n;
                     LinkedList<Point2D> path = new LinkedList<>();
-                    LinkedList<Point2D> roboPath = new LinkedList<>();
+                    LinkedList<RobotConfig> roboPath = new LinkedList<>();
+                    List<List<Box>> listListBox = new ArrayList<>();
+                    String rootDir = null;
                     do {
+                        if (nodeCheck.getParent().getParent() == null) {
+                            rootDir = nodeCheck.getDirection();
+                        }
+                        if (nodeCheck.getDirection() == null) {
+                            nodeCheck.setDirection(rootDir);
+                        }
+
+                        List<Box> boxList = new ArrayList<>();
+                        boxList.addAll(movedBox);
+                        boxList.add(nodeCheck.getCurrBox());
+                        boxList.addAll(mvBox);
+
+                        roboPath.addFirst(getRobotPushConfig(nodeCheck));
                         path.addFirst(nodeCheck.getCurrPos());
+                        listListBox.add(boxList);
+
+
+
+
                         nodeCheck = nodeCheck.getParent();
                     } while (nodeCheck != null);
+                    allBoxCoords.add(listListBox);
+                    robotPaths.add(roboPath);
                     return path;
                 } else if (!opened.contains(n) && !closed.contains(n) && !isMvBox(n.currBox)
                         && !isMvObst(n.currBox) && !isStaticObst(n.currBox) && !isOutOfBounds(n.currBox)
@@ -170,11 +193,68 @@ public class Astar {
             ////System.out.println("node added to closed: " + q.getCurrPos().toString());
             ////System.out.println("# in closed: " + closed.size());
         }
-
+        allBoxCoords.add(null);
+        robotPaths.add(null);
         return null;
     }
 
+    private List<LinkedList<State>> getStateList() {
+        List<LinkedList<State>> allStatePaths = new ArrayList<>();
+        int counter1 = 0;
+        for (List<List<Box>> listListBox : allBoxCoords) {
+            LinkedList<State> statePath = new LinkedList<>();
+            int counter2 = 0;
+            if (listListBox == null) {
+                counter1++;
+                continue;
+            }
+            for (List<Box> boxList : listListBox) {
+                RobotConfig rc = robotPaths.get(counter1).get(counter2);
+                State state = new State(rc, boxList, mvObst);
+                statePath.add(state);
+                counter2++;
+            }
+            allStatePaths.add(statePath);
+            counter1++;
+        }
+        return allStatePaths;
+    }
 
+    private RobotConfig getRobotPushConfig(Node node) {
+        String dir = node.getDirection();
+        RobotConfig rc;
+        switch (dir) {
+            case "u": {
+                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
+                        , formatDouble(node.getCurrPos().getY() - width));
+                double angle = 0;
+                rc = new RobotConfig(point, angle);
+                break;
+            }
+            case "d": {
+                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
+                        , formatDouble(node.getCurrPos().getY()));
+                double angle = 0;
+                rc = new RobotConfig(point, angle);
+                break;
+            }
+            case "l": {
+                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width))
+                        , formatDouble(node.getCurrPos().getY() - (width / 2)));
+                double angle = Math.PI / 2;
+                rc = new RobotConfig(point, angle);
+                break;
+            }
+            default: {
+                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX())
+                        , formatDouble(node.getCurrPos().getY() - (width / 2)));
+                double angle = Math.PI / 2;
+                rc = new RobotConfig(point, angle);
+                break;
+            }
+        }
+        return rc;
+    }
 
     private boolean isMvBox(Box currBox) {
         // Check the mvBox list
@@ -278,6 +358,10 @@ public class Astar {
                 return n.getCurrPos().equals(currPos);
             }
             return false;
+        }
+
+        private Box getCurrBox() {
+            return currBox;
         }
 
         private Point2D getCurrPos() {
