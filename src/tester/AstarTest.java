@@ -23,11 +23,14 @@ public class AstarTest {
 
         Astar astar = new Astar(ps);
         List<LinkedList<State>> listOfStates = astar.getStateList();
-
+        int counter = 0;
         for (LinkedList<State> stateList : listOfStates) {
+            System.out.println(counter);
             for (State state : stateList) {
                 System.out.println(state.toString());
+
             }
+            counter++;
         }
     }
 }
