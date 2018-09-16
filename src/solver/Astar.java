@@ -17,11 +17,9 @@ public class Astar {
     private final double STEP_SIZE = Tester.MAX_BASE_STEP;
     private final DecimalFormat DECIMAL = new DecimalFormat("0.###");
     private List<Point2D> goalList = new ArrayList<>();
-    private List<String> obstMovement = new ArrayList<>();
     private List<Box> mvBox = new ArrayList<>();
     private List<Box> movedBox =  new ArrayList<>();
     private List<Box> mvObst = new ArrayList<>();
-    private List<Box> movedObst = new ArrayList<>();
     private List<StaticObstacle> staticObst = new ArrayList<>();
     private Point2D start;
     private Point2D end;
@@ -30,7 +28,7 @@ public class Astar {
     private List<Node> opened = new ArrayList<>();
     private List<Node> closed = new ArrayList<>();
     private List<LinkedList<Point2D>> mvBoxPaths =  new ArrayList<>();
-    private List<LinkedList<Point2D>> mvObstPaths = new ArrayList<>();
+    private List<LinkedList<Point2D>> robotPaths = new ArrayList<>();
 
     // Constructors //
     public Astar(ProblemSpec ps) {
@@ -38,7 +36,6 @@ public class Astar {
         setMvObst(ps.getMovingObstacles());
         setStaticObst(ps.getStaticObstacles());
         setGoalList(ps.getMovingBoxEndPositions());
-        reloadObstMovement();
         setPath();
     }
 
@@ -88,43 +85,13 @@ public class Astar {
         opened.add(root);
     }
 
-    private void initObstData() {
-        Box obst = mvObst.remove(0);
-        start = obst.getPos();
-        width = obst.getWidth();
-        end = chooseDir();
-
-        Node root = new Node(start, null);
-        opened.add(root);
-    }
-
-    private void reloadObstMovement() {
-        obstMovement.add("u");
-        obstMovement.add("d");
-        obstMovement.add("l");
-        obstMovement.add("r");
-    }
-
     private void updateMovedBox(boolean bool) {
         if (bool) {
             Box box = new MovingBox(end, width);
             movedBox.add(box);
         } else {
             Box box = new MovingBox(start, width);
-            mvBox.add(0, box);
-            goalList.add(0, end);
-        }
-        opened.clear();
-        closed.clear();
-    }
-
-    private void updateMovedObst(boolean bool) {
-        if (bool) {
-            Box obst = new MovingObstacle(end, width);
-            movedObst.add(obst);
-        } else {
-            Box obst = new MovingObstacle(start, width);
-            movedObst.add(obst);
+            movedBox.add(box);
         }
         opened.clear();
         closed.clear();
@@ -141,48 +108,7 @@ public class Astar {
             } else {
                 updateMovedBox(false);
                 System.out.println("path does not exist");
-
-                // move all boxes by a direction
-                while (!mvObst.isEmpty()) {
-                    initObstData();
-                    while (path == null && end != null) {
-                        path =  pathSearch();
-                        end = chooseDir();
-                    }
-                    // Restore obstMovement for next round of loop
-                    reloadObstMovement();
-
-                    // in this situation either path is found or
-                    // path is still null but end is null.
-                    mvObstPaths.add(path);
-                    if (path != null) {
-                        updateMovedObst(true);
-                    } else {
-                        updateMovedObst(false);
-                    }
-                }
-                mvObst.addAll(movedObst);
-                movedObst.clear();
             }
-        }
-    }
-
-
-    private Point2D chooseDir() {
-        if (obstMovement.size() > 0) {
-            String direction = obstMovement.remove(0);
-            switch (direction) {
-                case "u":
-                    return new Point2D.Double(start.getX(), (start.getY() - robotWidth));
-                case "d":
-                    return new Point2D.Double(start.getX(), (start.getY() + robotWidth));
-                case "l":
-                    return new Point2D.Double((start.getX() - robotWidth), start.getY());
-                default:
-                    return new Point2D.Double((start.getX() - robotWidth), start.getY());
-            }
-        } else {
-            return null;
         }
     }
 
@@ -223,6 +149,7 @@ public class Astar {
                 if (n.getCurrPos().equals(end)) {
                     Node nodeCheck = n;
                     LinkedList<Point2D> path = new LinkedList<>();
+                    LinkedList<Point2D> roboPath = new LinkedList<>();
                     do {
                         path.addFirst(nodeCheck.getCurrPos());
                         nodeCheck = nodeCheck.getParent();
@@ -245,6 +172,8 @@ public class Astar {
 
         return null;
     }
+
+
 
     private boolean isMvBox(Box currBox) {
         // Check the mvBox list
@@ -303,10 +232,6 @@ public class Astar {
 
     public List<LinkedList<Point2D>> getMvBoxPaths() {
         return mvBoxPaths;
-    }
-
-    public List<LinkedList<Point2D>> getMvObstPaths() {
-        return mvObstPaths;
     }
 
     private double formatDouble(double number) {

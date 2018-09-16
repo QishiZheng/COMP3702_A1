@@ -22,9 +22,7 @@ public class AstarTest {
 
         Astar astar = new Astar(ps);
         List<LinkedList<Point2D>> listOfPaths = astar.getMvBoxPaths();
-        List<LinkedList<Point2D>> listOfObstPaths = astar.getMvObstPaths();
 
-        int j = 0;
         for (LinkedList<Point2D> path : listOfPaths) {
             if (path != null) {
                 System.out.println("BOX PATH:");
@@ -32,16 +30,7 @@ public class AstarTest {
                     System.out.println("X: " + coord.getX() + ", Y: " + coord.getY());
                 }
             } else {
-                for (int i = 0; i < ps.getMovingObstacles().size(); i++, j++) {
-                    System.out.println("OBSTACLE PATH:");
-                    if (listOfObstPaths.get(j) != null) {
-                        for (Point2D coord : listOfObstPaths.get(j)) {
-                            System.out.println("X: " + coord.getX() + ", Y: " + coord.getY());
-                        }
-                    } else {
-                        System.out.println("null");
-                    }
-                }
+                System.out.println("null");
             }
         }
     }
