@@ -43,10 +43,11 @@ public class State {
      * @param boxes a list of boxes
      * @param movingObst a list of moving obstacles
      */
-    public State(RobotConfig rc, List<Box> boxes, List<Box> movingObst) {
+    public State(RobotConfig rc, List<Box> boxes, List<Box> movingObst, List<StaticObstacle> staticObst) {
         this.robotState = rc;
         this.boxState = boxes;
         this.movingObstState = movingObst;
+        staticObstState = staticObst;
     }
 
     /**
