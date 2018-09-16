@@ -407,14 +407,4 @@ public class PRM {
         DecimalFormat formatter = new DecimalFormat("#0.000");
         return Double.parseDouble(formatter.format(num));
     }
-
-    public static void main(String[] args) {
-        RobotConfig rc1 = new RobotConfig(new Point2D.Double(0.1, 0.1), 0);
-        RobotConfig rc2 = new RobotConfig(new Point2D.Double(0.3, 0.11), Math.PI/2);
-        List<RobotConfig> path = robotPathBreakDown(rc1, rc2);
-        for(RobotConfig r : path) {
-            System.out.println(r);
-        }
-        System.out.println(stepsNeeded(rc1,rc2));
-    }
 }
