@@ -7,6 +7,7 @@ import tester.Tester;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 
@@ -33,18 +34,18 @@ public class PRM {
         this.ts = new Tester(problem);
     }
 
-    //Constructs with maxnode, maxNeighbors, init and goal config
-    //TODO: TO BE FULLY IMPLEMENTED
-    public PRM(ProblemSpec problem, State s, int maxNode, int maxNeighbor, RobotConfig init, RobotConfig goal) {
-        this.ps = problem;
-        this.n = maxNode;
-        this.k = maxNeighbor;
-        this.init = init;
-        this.goal = goal;
-
-        this.states = s;
-        this.ts = new Tester(problem);
-    }
+//    //Constructs with maxnode, maxNeighbors, init and goal config
+//    //TODO: TO BE FULLY IMPLEMENTED
+//    public PRM(ProblemSpec problem, State s, int maxNode, int maxNeighbor, RobotConfig init, RobotConfig goal) {
+//        this.ps = problem;
+//        this.n = maxNode;
+//        this.k = maxNeighbor;
+//        this.init = init;
+//        this.goal = goal;
+//
+//        this.states = s;
+//        this.ts = new Tester(problem);
+//    }
 
     //Constructs with maxnode, maxNeighbors
     public PRM(ProblemSpec problem, State s, int maxNode, int maxNeighbor) {
@@ -327,7 +328,9 @@ public class PRM {
             RobotConfig currentNode = fringe.remove();
             // Goal test
             if (currentNode.equals(goalConf)) {
-                return backchainz(currentNode, reachedFrom);
+//                return backchainz(currentNode, reachedFrom);
+                LinkedList<RobotConfig> stepPath = new LinkedList<>(fullRobotPathBreakDown(backchainz(currentNode, reachedFrom)));
+                return stepPath;
             }
             // Get the set of neighbors of the current node
             Set<RobotConfig> successors = map.get(currentNode);
@@ -419,8 +422,8 @@ public class PRM {
      * @param n number of samples
      * @return A list of n RobotConfigs
      */
-    private List<RobotConfig> sampleOnEdge(RobotConfig r1, RobotConfig r2, int n) {
-        List<RobotConfig> samples = new ArrayList<>();
+    private static LinkedList<RobotConfig> sampleOnEdge(RobotConfig r1, RobotConfig r2, int n) {
+        LinkedList<RobotConfig> samples = new LinkedList<>();
 
         Double x, y, angle;
 
@@ -445,16 +448,69 @@ public class PRM {
 //            Double x = r1.getPos().getX() + (i * ((Math.abs(r1.getPos().getX() - r2.getPos().getX())) / n));
 //            Double y = r1.getPos().getY() + (i * ((Math.abs(r1.getPos().getY() - r2.getPos().getY())) / n));
 //            Double angle = r1.getOrientation() + (i * ((Math.abs(r1.getOrientation() - r2.getOrientation())) / n));
-            RobotConfig s  = new RobotConfig(new Point2D.Double(x, y), angle);
+            RobotConfig s  = new RobotConfig(new Point2D.Double(doubleFormatter(x), doubleFormatter(y)), doubleFormatter(angle));
             samples.add(s);
         }
         return samples;
     }
 
 
-    //For testing methods
-    public static void main(String[] args) {
 
+    /**
+     * Get the path from RobotConfig rc1 to RobotConfig rc2 at maximum of unit 0.001 per step
+     * @param rc1 RobotConfig 1
+     * @param rc2 RobotConfig 2
+     * @return a list of robotConfig that represents path
+     */
+    private static LinkedList<RobotConfig> robotPathBreakDown(RobotConfig rc1, RobotConfig rc2) {
+        LinkedList<RobotConfig> path = new LinkedList<>();
+        Double distance = Math.sqrt(Math.pow(rc1.getPos().getX() - rc2.getPos().getX(), 2)
+                + Math.pow(rc1.getPos().getY() - rc2.getPos().getY(), 2)
+                + Math.pow(rc1.getOrientation() - rc2.getOrientation(), 2));
+
+        int steps = stepsNeeded(rc1, rc2);
+        path = sampleOnEdge(rc1, rc2, steps);
+        return path;
     }
 
+    //get the detailed step by step robot path from a rough path
+    private static LinkedList<RobotConfig> fullRobotPathBreakDown(LinkedList<RobotConfig> path) {
+        LinkedList<RobotConfig> fullPath = new LinkedList<>();
+        for(int i = 0; i < path.size() - 1; i++) {
+            fullPath.addAll(robotPathBreakDown(path.get(i), path.get(i + 1)));
+        }
+        return fullPath;
+    }
+
+    /**
+     * Return the number of steps needed to move rc1 to rc2
+     * each step cannot exceed 0.001
+     * @param rc1
+     * @param rc2
+     * @return the number of steps needed to move rc1 to rc2
+     */
+    public static int stepsNeeded(RobotConfig rc1, RobotConfig rc2) {
+        Double distance = Math.sqrt(Math.pow(rc1.getPos().getX() - rc2.getPos().getX(), 2)
+                + Math.pow(rc1.getPos().getY() - rc2.getPos().getY(), 2)
+                + Math.pow(rc1.getOrientation() - rc2.getOrientation(), 2));
+
+        int steps = (int) Math.ceil(distance/0.001);
+        return steps;
+    }
+
+
+    private static double doubleFormatter(Double num) {
+        DecimalFormat formatter = new DecimalFormat("#0.000");
+        return Double.parseDouble(formatter.format(num));
+    }
+
+    public static void main(String[] args) {
+        RobotConfig rc1 = new RobotConfig(new Point2D.Double(0.1, 0.1), 0);
+        RobotConfig rc2 = new RobotConfig(new Point2D.Double(0.3, 0.11), Math.PI/2);
+        List<RobotConfig> path = robotPathBreakDown(rc1, rc2);
+        for(RobotConfig r : path) {
+            System.out.println(r);
+        }
+        System.out.println(stepsNeeded(rc1,rc2));
+    }
 }
