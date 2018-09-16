@@ -17,7 +17,6 @@ public class State {
     private List<Box> boxState;
     //state of moving obstacles
     private List<Box> movingObstState;
-    //state of static obstacles
 
     private ProblemSpec problemSpec;
 
@@ -70,7 +69,7 @@ public class State {
     public List<Box> getMovingObst() {
         return this.movingObstState;
     }
-
+    
     /**
      * TODO: TO BE IMPLEMENTED
      * Get the cost from current state to given state s
