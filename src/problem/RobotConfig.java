@@ -74,4 +74,10 @@ public class RobotConfig {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "RobotConfig: (" + this.getPos().getX() + ", "
+                + this.getPos().getY() + ", "
+                + this.getOrientation() + ")";
+    }
 }
