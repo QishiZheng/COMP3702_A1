@@ -198,7 +198,7 @@ public class Astar {
         return null;
     }
 
-    private List<LinkedList<State>> getStateList() {
+    public List<LinkedList<State>> getStateList() {
         List<LinkedList<State>> allStatePaths = new ArrayList<>();
         int counter1 = 0;
         for (List<List<Box>> listListBox : allBoxCoords) {
