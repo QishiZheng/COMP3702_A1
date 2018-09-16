@@ -112,9 +112,10 @@ public class Astar {
 
     private boolean isMvBox(Box currBox) {
         for (MovingBox mb : mvBox) {
-            if (currBox.getRect().intersects(mb.getRect().getX(), mb.getRect().getY()
-                    , mb.getWidth(), mb.getWidth())) {
+            if (currBox.getRect().intersects(formatDouble(mb.getRect().getX()), formatDouble(mb.getRect().getY())
+                    , formatDouble(mb.getWidth()), formatDouble(mb.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
+                System.out.println("Moving Box at: " + currBox.getPos().toString());
                 return true;
             }
         }
@@ -123,8 +124,8 @@ public class Astar {
 
     private boolean isMvObst(Box currBox) {
         for (MovingObstacle mo : mvObst) {
-            if (currBox.getRect().intersects(mo.getRect().getX(), mo.getRect().getY()
-                    , mo.getWidth(), mo.getWidth())) {
+            if (currBox.getRect().intersects(formatDouble(mo.getRect().getX()), formatDouble(mo.getRect().getY())
+                    , formatDouble(mo.getWidth()), formatDouble(mo.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
                 return true;
             }
@@ -134,8 +135,8 @@ public class Astar {
 
     private boolean isStaticObst(Box currBox) {
         for (StaticObstacle so : staticObst) {
-            if (currBox.getRect().intersects(so.getRect().getX(), so.getRect().getY()
-                    , so.getRect().getWidth(), so.getRect().getWidth())) {
+            if (currBox.getRect().intersects(formatDouble(so.getRect().getX()), formatDouble(so.getRect().getY())
+                    , formatDouble(so.getRect().getWidth()), formatDouble(so.getRect().getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
                 return true;
             }
@@ -144,12 +145,16 @@ public class Astar {
     }
 
     private boolean isOutOfBounds(Box currBox) {
-        return ((currBox.getRect().getMaxX() > 1) || (currBox.getRect().getMaxY() > 1)
-                || (currBox.getRect().getMinX() < 0) || (currBox.getRect().getMinY() < 0));
+        return ((formatDouble(currBox.getRect().getMaxX()) > 1) || (formatDouble(currBox.getRect().getMaxY()) > 1)
+                || (formatDouble(currBox.getRect().getMinX()) < 0) || (formatDouble(currBox.getRect().getMinY()) < 0));
     }
 
     public LinkedList<Point2D> getPath() {
         return path;
+    }
+
+    private double formatDouble(double number) {
+        return Double.parseDouble(DECIMAL.format(number));
     }
 
 
@@ -214,19 +219,19 @@ public class Astar {
 
         private void setG() {
             if (parent != null) {
-                gCost = Double.parseDouble(DECIMAL.format(parent.getG() + STEP_SIZE));
+                gCost = formatDouble(parent.getG() + STEP_SIZE);
             } else {
                 gCost = 0;
             }
         }
 
         private void setH() {
-            hCost = Double.parseDouble(DECIMAL.format(Math.abs(end.getX() - currPos.getX())
-                    + Math.abs(end.getY() - currPos.getY())));
+            hCost = formatDouble(Math.abs(end.getX() - currPos.getX())
+                    + Math.abs(end.getY() - currPos.getY()));
         }
 
         private void setF() {
-            fCost = Double.parseDouble(DECIMAL.format(gCost + hCost));
+            fCost = formatDouble(gCost + hCost);
         }
 
         private void setCosts() {
@@ -238,12 +243,12 @@ public class Astar {
         private void setChildren() {
             // order = [u, d, l ,r]
             Point2D u = new Point2D.Double(currPos.getX()
-                    , Double.parseDouble(DECIMAL.format(currPos.getY() - STEP_SIZE)));
+                    , formatDouble(currPos.getY() - STEP_SIZE));
             Point2D d = new Point2D.Double(currPos.getX()
-                    , Double.parseDouble(DECIMAL.format(currPos.getY() + STEP_SIZE)));
-            Point2D l = new Point2D.Double(Double.parseDouble(DECIMAL.format(currPos.getX() - STEP_SIZE))
+                    , formatDouble(currPos.getY() + STEP_SIZE));
+            Point2D l = new Point2D.Double(formatDouble(currPos.getX() - STEP_SIZE)
                     , currPos.getY());
-            Point2D r = new Point2D.Double(Double.parseDouble(DECIMAL.format(currPos.getX() + STEP_SIZE))
+            Point2D r = new Point2D.Double(formatDouble(currPos.getX() + STEP_SIZE)
                     , currPos.getY());
             children.add(u);
             children.add(d);
