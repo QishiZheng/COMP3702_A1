@@ -6,6 +6,7 @@ import tester.Tester;
 import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -76,12 +77,12 @@ public class Astar {
 
     private void initBoxData() {
         Box box = mvBox.remove(0);
-        System.out.println("Box selected: " + box.getPos().toString());
+        ////System.out.println("Box selected: " + box.getPos().toString());
         start = box.getPos();
         width = box.getWidth();
         robotWidth = width;
         end = goalList.remove(0);
-        System.out.println("Box goal: " + end.toString());
+        ////System.out.println("Box goal: " + end.toString());
 
         Node root = new Node(start, null);
         opened.add(root);
@@ -105,11 +106,11 @@ public class Astar {
             LinkedList<Point2D> path = pathSearch();
             mvBoxPaths.add(path);
             if (path != null) {
-                System.out.println("path exists");
+                ////System.out.println("path exists");
                 updateMovedBox(true);
             } else {
                 updateMovedBox(false);
-                System.out.println("path does not exist");
+                ////System.out.println("path does not exist");
             }
         }
     }
@@ -153,18 +154,13 @@ public class Astar {
                     LinkedList<Point2D> path = new LinkedList<>();
                     LinkedList<RobotConfig> roboPath = new LinkedList<>();
                     List<List<Box>> listListBox = new ArrayList<>();
-                    String rootDir = null;
                     do {
-                        if (nodeCheck.getParent().getParent() == null) {
-                            rootDir = nodeCheck.getDirection();
-                        }
-                        if (nodeCheck.getDirection() == null) {
-                            nodeCheck.setDirection(rootDir);
-                        }
+                        Point2D point = new Point2D.Double(formatDouble(nodeCheck.getCurrPos().getX())
+                                , formatDouble(nodeCheck.getCurrPos().getY()));
 
                         List<Box> boxList = new ArrayList<>();
                         boxList.addAll(movedBox);
-                        boxList.add(nodeCheck.getCurrBox());
+                        boxList.add(new MovingBox(point, formatDouble(width)));
                         boxList.addAll(mvBox);
 
                         roboPath.addFirst(getRobotPushConfig(nodeCheck));
@@ -176,6 +172,7 @@ public class Astar {
 
                         nodeCheck = nodeCheck.getParent();
                     } while (nodeCheck != null);
+                    Collections.reverse(listListBox);
                     allBoxCoords.add(listListBox);
                     robotPaths.add(roboPath);
                     return path;
@@ -198,7 +195,7 @@ public class Astar {
         return null;
     }
 
-    private List<LinkedList<State>> getStateList() {
+    public List<LinkedList<State>> getStateList() {
         List<LinkedList<State>> allStatePaths = new ArrayList<>();
         int counter1 = 0;
         for (List<List<Box>> listListBox : allBoxCoords) {
@@ -223,35 +220,31 @@ public class Astar {
     private RobotConfig getRobotPushConfig(Node node) {
         String dir = node.getDirection();
         RobotConfig rc;
-        switch (dir) {
-            case "u": {
-                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
-                        , formatDouble(node.getCurrPos().getY() - width));
-                double angle = 0;
-                rc = new RobotConfig(point, angle);
-                break;
-            }
-            case "d": {
-                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
-                        , formatDouble(node.getCurrPos().getY()));
-                double angle = 0;
-                rc = new RobotConfig(point, angle);
-                break;
-            }
-            case "l": {
-                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width))
-                        , formatDouble(node.getCurrPos().getY() - (width / 2)));
-                double angle = Math.PI / 2;
-                rc = new RobotConfig(point, angle);
-                break;
-            }
-            default: {
-                Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX())
-                        , formatDouble(node.getCurrPos().getY() - (width / 2)));
-                double angle = Math.PI / 2;
-                rc = new RobotConfig(point, angle);
-                break;
-            }
+        if (dir == null) {
+            Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
+                    , formatDouble(node.getCurrPos().getY()));
+            double angle = 0;
+            rc = new RobotConfig(point, angle);
+        } else if ("u".equals(dir)) {
+            Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
+                    , formatDouble(node.getCurrPos().getY()));
+            double angle = 0;
+            rc = new RobotConfig(point, angle);
+        } else if ("d".equals(dir)) {
+            Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width / 2))
+                    , formatDouble(node.getCurrPos().getY() + width));
+            double angle = 0;
+            rc = new RobotConfig(point, angle);
+        } else if ("l".equals(dir)) {
+            Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX() + (width))
+                    , formatDouble(node.getCurrPos().getY() - (width / 2)));
+            double angle = formatDouble(Math.PI / 2);
+            rc = new RobotConfig(point, angle);
+        } else {
+            Point2D point = new Point2D.Double(formatDouble(node.getCurrPos().getX())
+                    , formatDouble(node.getCurrPos().getY() + (width / 2)));
+            double angle = formatDouble(Math.PI / 2);
+            rc = new RobotConfig(point, angle);
         }
         return rc;
     }
@@ -306,7 +299,7 @@ public class Astar {
     private boolean isOutOfBounds(Box currBox) {
         if ((formatDouble(currBox.getRect().getMaxX()) > 1) || (formatDouble(currBox.getRect().getMaxY()) > 1)
                 || (formatDouble(currBox.getRect().getMinX()) < 0) || (formatDouble(currBox.getRect().getMinY()) < 0)) {
-            System.out.println("Out of bounds at: " + currBox.getPos().toString());
+            ////System.out.println("Out of bounds at: " + currBox.getPos().toString());
             return true;
         }
         return false;

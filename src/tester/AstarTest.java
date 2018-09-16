@@ -2,6 +2,7 @@ package tester;
 
 import problem.*;
 import solver.Astar;
+import solver.State;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
@@ -13,7 +14,7 @@ public class AstarTest {
         // Configure here //
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input3.txt");
+            ps.loadProblem("input2.txt");
         } catch (IOException ioe) {
             System.out.println("FAILED: Invalid problem file");
             System.out.println(ioe.getMessage());
@@ -21,17 +22,15 @@ public class AstarTest {
         // End Configuration //
 
         Astar astar = new Astar(ps);
-        List<LinkedList<Point2D>> listOfPaths = astar.getMvBoxPaths();
+        List<LinkedList<State>> listOfStates = astar.getStateList();
+        int counter = 0;
+        for (LinkedList<State> stateList : listOfStates) {
+            System.out.println(counter);
+            for (State state : stateList) {
+                System.out.println(state.toString());
 
-        for (LinkedList<Point2D> path : listOfPaths) {
-            if (path != null) {
-                System.out.println("BOX PATH:");
-                for (Point2D coord : path) {
-                    System.out.println("X: " + coord.getX() + ", Y: " + coord.getY());
-                }
-            } else {
-                System.out.println("null");
             }
+            counter++;
         }
     }
 }
