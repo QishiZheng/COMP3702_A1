@@ -43,7 +43,7 @@ public class Agent {
         System.out.println("Root robotConf: (" +robotInit.getPos().getX() + ", "
                 + robotInit.getPos().getY() + ", " + robotInit.getOrientation() + ")");
 
-        RobotConfig robotGoal = new RobotConfig(new Point2D.Double(0.3, 0.8), Math.PI/2);
+        RobotConfig robotGoal = new RobotConfig(new Point2D.Double(0.666, 0.875), Math.PI/2);
         if(!s.robotCollisionFree(robotGoal)) {
             System.out.println("Goal in obstacle\n" + "***********************");
         }
@@ -51,7 +51,9 @@ public class Agent {
         System.out.println("Goal robotConf: (" +robotGoal.getPos().getX() + ", "
                 + robotGoal.getPos().getY() + ", " + robotGoal.getOrientation() + ")");
 
-        PRM prm = new PRM(ps, s, 1000, 10, robotInit, robotGoal);
+        PRM prm = new PRM(ps, s, 500, 10);
+        prm.setInit(robotInit);
+        prm.setGoal(robotGoal);
 
         //StateGraph sg = prm.buildGraph();
         HashMap<RobotConfig, Set<RobotConfig>> sg = prm.buildMap();
@@ -84,33 +86,6 @@ public class Agent {
 
         long endTime = System.currentTimeMillis();
         System.out.println("Total Time Took "+(endTime - startTime)/1000 + " s");
-
     }
-
-
-
-    /**
-     * Get the path from box a to box b at maximum of unit 0.001 per step
-     * @param a box a
-     * @param b box b
-     * @return a list of box the path from box a to box b
-     */
-    private List<Box> movingBoxPathBreakdown(Box a, Box b) {
-        List<Box> path = new LinkedList<>();
-
-        //TODO: BREAK THE MOVEMENT TO 0.001 UNIT EACH STEP
-
-        return path;
-    }
-
-    private List<RobotConfig> robotPathBreakDonw(RobotConfig rc1, RobotConfig rc2) {
-        List<RobotConfig> path = new LinkedList<>();
-
-        //TODO: BREAK THE MOVEMENT TO 0.001 UNIT EACH STEP
-
-        return path;
-    }
-
-
 
 }
