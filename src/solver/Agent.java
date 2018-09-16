@@ -28,20 +28,20 @@ public class Agent {
 
         ProblemSpec ps = new ProblemSpec();
 
-//        try {
-//            ps.loadProblem(args[0]);
-//        } catch (IOException e1) {
-//            System.out.println("FAILED: Invalid problem file");
-//            System.out.println(e1.getMessage());
-//            return;
-//        }
-
-
         try {
-            ps.loadProblem("input2.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
+            ps.loadProblem(args[0]);
+        } catch (IOException e1) {
+            System.out.println("FAILED: Invalid problem file");
+            System.out.println(e1.getMessage());
+            return;
         }
+
+
+//        try {
+//            ps.loadProblem("input1.txt");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         //create a initial state from the problrmSpec
         State s = new State(ps);
@@ -101,17 +101,17 @@ public class Agent {
         }
 
         SolutionWriter writer = new SolutionWriter();
-        try {
-            writer.writePath(path, "solution1.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
 //        try {
-//            writer.writePath(path, args[1]);
+//            writer.writePath(path, "solution1.txt");
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+
+        try {
+            writer.writePath(path, args[1]);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
 
