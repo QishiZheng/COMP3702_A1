@@ -74,10 +74,14 @@ public class RobotConfig {
         return false;
     }
 
+    /**
+     * String representation of robot for writing solution to file
+     * @return String representation of robot for writing solution to file
+     */
     @Override
     public String toString() {
-        return "RobotConfig: (" + this.getPos().getX() + ", "
-                + this.getPos().getY() + ", "
-                + this.getOrientation() + ")";
+        return this.getPos().getX() + " "
+                + this.getPos().getY() + " "
+                + this.getOrientation() + " ";
     }
 }

@@ -5,6 +5,7 @@ import problem.ProblemSpec;
 import problem.RobotConfig;
 import tester.Tester;
 
+import javax.sound.sampled.Line;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
@@ -12,7 +13,8 @@ import java.util.*;
 import java.util.List;
 
 /**
- * PRM algorithm for sampling configuration of the robot
+ * PRM algorithm for sampling configuration of the robot.
+ * CONSTRUCT A NEW PRM OBJECT EVERY TIME WHEN WE WANT TO DO SEARCH IN A NEW STATE
  */
 public class PRM {
     //max number of nodes to put in the roadmap
@@ -47,13 +49,23 @@ public class PRM {
 //        this.ts = new Tester(problem);
 //    }
 
-    //Constructs with maxnode, maxNeighbors
-    public PRM(ProblemSpec problem, State s, int maxNode, int maxNeighbor) {
+    /**
+     * Constructor
+     * @param problem the problem spec we are dealing with
+     * @param initState init state to start
+     * @param maxNode
+     * @param maxNeighbor
+     * @param init initial robotConfig
+     * @param goal goal robotConfig
+     */
+    public PRM(ProblemSpec problem, State initState, int maxNode, int maxNeighbor, RobotConfig init, RobotConfig goal) {
         this.ps = problem;
         this.n = maxNode;
         this.k = maxNeighbor;
+        this.setInit(init);
+        this.setGoal(goal);
 
-        this.states = s;
+        this.states = initState;
         this.ts = new Tester(problem);
     }
 
@@ -86,6 +98,10 @@ public class PRM {
     }
 
 
+    /**
+     * Build the graph for robotConfig with fixed collision region.
+     * @return a graph of robotConfig in the form of map
+     */
     public HashMap<RobotConfig, Set<RobotConfig>> buildMap() {
         // Hashmap to hold the vertices and their k neighbors
         HashMap<RobotConfig, Set<RobotConfig>> roadmap = new HashMap<RobotConfig, Set<RobotConfig>>();
@@ -315,7 +331,15 @@ public class PRM {
 //        newconnectKthNearestNeighbors(roadmap, rc);
 //    }
 
-    public LinkedList<RobotConfig> BFS(HashMap<RobotConfig, Set<RobotConfig>> map, RobotConfig rootConf, RobotConfig goalConf) {
+
+    /**
+     * BFS search algorithm for searching path from root to goal in the given graph/roadmap
+     * @param map given graph/roadmap
+     * @param rootConf root robotConfig
+     * @param goalConf goal robotConfig
+     * @return linkedList of robotConfig
+     */
+    public LinkedList<State> BFS(HashMap<RobotConfig, Set<RobotConfig>> map, RobotConfig rootConf, RobotConfig goalConf) {
         // Fringe
         Queue<RobotConfig> fringe = new LinkedList<RobotConfig>();
         // Map to store backchain information
@@ -330,7 +354,8 @@ public class PRM {
             if (currentNode.equals(goalConf)) {
 //                return backchainz(currentNode, reachedFrom);
                 LinkedList<RobotConfig> stepPath = new LinkedList<>(fullRobotPathBreakDown(backchainz(currentNode, reachedFrom)));
-                return stepPath;
+                LinkedList<State> stateStepPath = toStatePath(stepPath, this.states);
+                return stateStepPath;
             }
             // Get the set of neighbors of the current node
             Set<RobotConfig> successors = map.get(currentNode);
@@ -398,6 +423,41 @@ public class PRM {
         rad = (double)Math.round(rad * 1000d) / 1000d;
         return rad;
     }
+
+
+//    /**
+//     * Check if given robot config has collision with all of the movable objects
+//     * in given state s
+//     * @param rc robot config
+//     * @param s given state for checking
+//     * @return true if has no collision
+//     *
+//     */
+//    private boolean robotCollisionFree(RobotConfig rc, State s) {
+//        Tester ts = new Tester(this.ps);
+//
+//        List<Box> movables = new ArrayList<>();
+//        movables.addAll(s.getBoxes());
+//        movables.addAll(s.getMovingObst());
+//        //System.out.println("Size of Obs: " + movables.size() + "\n");
+//        return ts.hasCollision(rc, movables);
+//    }
+
+
+    /**
+     * Convert the path of robot to path of state.
+     * @param robotPath the robot path that we are going to convert
+     * @param s the state before moving any boxes
+     * @return a list of state
+     */
+    private LinkedList<State> toStatePath(List<RobotConfig> robotPath, State s) {
+        LinkedList<State> statePath = new LinkedList<>();
+        for(RobotConfig rc : robotPath) {
+            statePath.add(new State(rc, s.getBoxes(), s.getMovingObst()));
+        }
+        return statePath;
+    }
+
 
     /**
      * Check if the path between RobotConfig is collision free
