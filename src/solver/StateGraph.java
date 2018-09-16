@@ -15,7 +15,8 @@ public class StateGraph<T> {
     private List<Edge<T>> edges;
 
     /**
-     * Construct the state graph with root and goal vertices/states
+     * Construct the state graph with root and goal vertices/states,
+     * add root and goal vertices to the graph
      * @param root
      * @param goal
      */
@@ -24,6 +25,9 @@ public class StateGraph<T> {
         this.goal = goal;
         vertices = new ArrayList<Vertex<T>>();
         edges = new ArrayList<Edge<T>>();
+
+        vertices.add(root);
+        vertices.add(goal);
     }
 
     public StateGraph() {
@@ -40,6 +44,50 @@ public class StateGraph<T> {
     public Vertex<T> getRootVertex() {
         return this.root;
     }
+
+    /**
+     *
+     * @return a list of all vertices in the graph
+     */
+    public List<Vertex<T>> getAllVertices() {
+        return new ArrayList<Vertex<T>>(this.vertices);
+    }
+
+    /**
+     * Get given vertex in the graph if exists
+     * @param vertex given vertex
+     * @return the vertex that is equal to given vertex,
+     *          return null if not found
+     */
+    public Vertex<T> getVertexInGraph(Vertex<T> vertex) {
+        //return null if there is no such vertex in the graph
+        if(!hasVertex(vertex)) {
+            return null;
+        } else {
+            for(Vertex<T> v : getAllVertices()) {
+                if(v.equals(vertex)) { return v;}
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get a list of successors of the given node if the given vertex is in the graph
+     * @param vertex given vertex
+     * @return list of successors
+     */
+    public List<Vertex<T>> getSuccessors(Vertex<T> vertex) {
+        List<Vertex<T>> succs = new LinkedList<>();
+        for(Edge<T> e : getVertexInGraph(vertex).getNeighbors()) {
+            if(e.getStart().equals(vertex)) {
+                succs.add(e.getEnd());
+            } else if(e.getEnd().equals(vertex)) {
+                succs.add(e.getStart());
+            }
+        }
+        return succs;
+    }
+
 
     /**
      * Get the goal vertex
@@ -151,7 +199,7 @@ public class StateGraph<T> {
      *
      * @return the number of vertices in this graph
      */
-    public int getNumOfVertex() { return this.vertices.size(); }
+    public int numOfVertex() { return this.vertices.size(); }
 
 
 //    public static void main(String[] args) {

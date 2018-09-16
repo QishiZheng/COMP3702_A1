@@ -1,5 +1,7 @@
 package solver;
 
+import problem.RobotConfig;
+
 import java.util.ArrayList;
 
 import java.util.List;
@@ -31,9 +33,10 @@ public class Vertex<T> {
      *
      * @return a set of all neighbor edges that this vertex connected to
      */
-    public List getNeighbors() {
+    public List<Edge> getNeighbors() {
         return new ArrayList<Edge>(this.neighbors);
     }
+
 
     /**
      * Add the given edge e to the neighbors of this vertex
@@ -95,4 +98,13 @@ public class Vertex<T> {
         return this.state.hashCode()*32;
     }
 
+    public String toString() {
+        if(getState() instanceof RobotConfig) {
+            RobotConfig r = (RobotConfig) getState();
+            return "(" + r.getPos().getX() + ", "
+                    + r.getPos().getY() + ", "
+                    + r.getOrientation() + ")";
+        }
+        return "";
+    }
 }
