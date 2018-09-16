@@ -1,12 +1,15 @@
 package solver;
 
+import problem.Box;
 import problem.ProblemSpec;
 import problem.RobotConfig;
 import tester.Tester;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 /**
  * The search agent to solve the motion planning problem
@@ -24,7 +27,7 @@ public class Agent {
 
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input2.txt");
+            ps.loadProblem("input1.txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,20 +43,13 @@ public class Agent {
         System.out.println("Root robotConf: (" +robotInit.getPos().getX() + ", "
                 + robotInit.getPos().getY() + ", " + robotInit.getOrientation() + ")");
 
-        RobotConfig robotGoal = new RobotConfig(new Point2D.Double(0.11, 0.11), Math.PI/2);
+        RobotConfig robotGoal = new RobotConfig(new Point2D.Double(0.3, 0.8), Math.PI/2);
         if(!s.robotCollisionFree(robotGoal)) {
             System.out.println("Goal in obstacle\n" + "***********************");
         }
 
         System.out.println("Goal robotConf: (" +robotGoal.getPos().getX() + ", "
                 + robotGoal.getPos().getY() + ", " + robotGoal.getOrientation() + ")");
-
-//        RobotConfig robotGoal2 = new RobotConfig(new Point2D.Double(0.1, 0.7), 0);
-//        if(!s.robotCollisionFree(robotGoal2)) {
-//            System.out.println("Goal2 in obstacle\n" + "***********************");
-//        }
-//        System.out.println("Goal2 robotConf: (" +robotGoal2.getPos().getX() + ", "
-//                + robotGoal2.getPos().getY() + ", " + robotGoal2.getOrientation() + ")");
 
         PRM prm = new PRM(ps, s, 1000, 10, robotInit, robotGoal);
 
@@ -65,14 +61,7 @@ public class Agent {
 
         long consTime = System.currentTimeMillis();
         System.out.println("Graph Construction Took "+(consTime - startTime)/1000 + " s");
-        //print out all vertices
-//        List<Vertex<RobotConfig>> vertices = new ArrayList<>(sg.getAllVertices());
-//        for(int i = 0; i < vertices.size(); i++) {
-//            System.out.println(vertices.get(i).toString() + "has #neighbors: " + vertices.get(i).getNumOfNeighbors());
-//        }
 
-//        System.out.println("Num of edges that Root vertex has: " + sg.getRootVertex().getNumOfNeighbors());
-//        System.out.println("Num of edges that Goal vertex has: " + sg.getGoalVertex().getNumOfNeighbors());
         System.out.println("Num of edges that Root vertex has: " + sg.get(prm.getInit()).size());
         System.out.println("Num of edges that Goal vertex has: " + sg.get(prm.getGoal()).size());
 
@@ -89,20 +78,6 @@ public class Agent {
             System.out.println("No Solution");
         }
 
-//        //check if the path exists for goal 2
-//        prm.addNodeToGraph(sg, robotGoal2);
-//        if(prm.BFS(sg, robotInit,robotGoal2) != null) {
-//            System.out.println("Path for robotGoal2:\n");
-//            List<RobotConfig> path = prm.BFS(sg,robotInit,robotGoal2);
-//            for(int i = 0; i < path.size(); i++) {
-//                RobotConfig r = path.get(i);
-//                System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
-//                        + r.getPos().getY() + ", " + r.getOrientation() + ")");
-//            }
-//        } else {
-//            System.out.println("Goal 2 No Solution");
-//        }
-
         //time taken
         long searchTime = System.currentTimeMillis();
         System.out.println("Search Time Took "+(searchTime - consTime) + " ms");
@@ -110,27 +85,31 @@ public class Agent {
         long endTime = System.currentTimeMillis();
         System.out.println("Total Time Took "+(endTime - startTime)/1000 + " s");
 
-        //List<RobotConfig> path = prm.searchPath(sg);
-
-//        for(int i = 0; i < path.size(); i++) {
-//            RobotConfig r = path.get(i);
-//            System.out.println(i + " RobotConf: (" +r.getPos().getX() + ", "
-//                    + r.getPos().getY() + ", " + r.getOrientation() + ")");
-//        }
-
     }
 
 
 
     /**
-     * Get the path from point a to point b at maximum of unit 0.001 per step
-     * @param a point a
-     * @param b point b
-     * @return a list of Point2D the path from point a to point b
+     * Get the path from box a to box b at maximum of unit 0.001 per step
+     * @param a box a
+     * @param b box b
+     * @return a list of box the path from box a to box b
      */
-//    private List<Point2D> movingBoxPathBreakdown(Point2D a, Point2D b) {
-//
-//    }
+    private List<Box> movingBoxPathBreakdown(Box a, Box b) {
+        List<Box> path = new LinkedList<>();
+
+        //TODO: BREAK THE MOVEMENT TO 0.001 UNIT EACH STEP
+
+        return path;
+    }
+
+    private List<RobotConfig> robotPathBreakDonw(RobotConfig rc1, RobotConfig rc2) {
+        List<RobotConfig> path = new LinkedList<>();
+
+        //TODO: BREAK THE MOVEMENT TO 0.001 UNIT EACH STEP
+
+        return path;
+    }
 
 
 
