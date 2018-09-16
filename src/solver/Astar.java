@@ -1,122 +1,368 @@
 package solver;
 
+
 import problem.RobotConfig;
 
 import java.util.*;
 
+import problem.Box;
+import problem.MovingBox;
+import problem.MovingObstacle;
+import problem.StaticObstacle;
+import tester.Tester;
+
+import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+
 /**
  * Astart search algorithm for searching shortest path in the state graph.
  */
-public class Astar<T>  {
+public class Astar {
+    // Class Variables //
+    private final double STEP_SIZE = Tester.MAX_BASE_STEP;
+    private final DecimalFormat DECIMAL = new DecimalFormat("0.###");
+    private List<MovingBox> mvBox;
+    private List<MovingObstacle> mvObst;
+    private List<StaticObstacle> staticObst;
+    private Point2D start;
+    private Point2D end;
+    private double width;
+    private List<Node> opened = new ArrayList<>();
+    private List<Node> closed = new ArrayList<>();
+    private LinkedList<Point2D> path;
 
-    private PriorityQueue<Vertex<T>> container = new PriorityQueue<>();
-    private int totNodes = 0;
-    private StateGraph<RobotConfig> graph;
+    // Constructors //
+    public Astar(Box currBox, Point2D goal, List<MovingBox> mvBox, List<MovingObstacle> mvObst
+            , List<StaticObstacle> staticObst) {
+        this.start = currBox.getPos();
+        this.width = currBox.getWidth();
+        this.end = goal;
+        this.mvBox = mvBox;
+        this.mvObst = mvObst;
+        this.staticObst = staticObst;
 
-    public Astar(StateGraph<RobotConfig> graph) {
-        this.graph = graph;
+        setPath();
     }
 
-    /**
-     * If we're given a graph, use the secondly implemented search
-     * @param graph the state graph to A* search in
-     * @return the optimal path
-     */
-    public List<T> search(StateGraph<T> graph) {
-        return search(graph.getRootVertex(), graph.getGoalVertex());
+    // Methods //
+    private void setPath() {
+        Node root = new Node(start, null);
+        opened.add(root);
+        path = pathSearch();
     }
 
-    public List<T> search(Vertex<T> initial, Vertex<T> goal) {
-        // null for now
-        Vertex<T> rootNode = new Vertex<>(initial.getState());
-        // what will be assigned as later nodes' parents
-        AStarNode<T> lastNode = null;
-
-        // initialisations
-        container.add(rootNode);
-        List<AStarNode<T>> visitedNodes = new ArrayList<>();
-
-
-        while (container.size() > 0) {
-            // select the search tree node with the lowest total path cost
-            Vertex<T> currentNode = container.poll();
-
-            if (currentNode == null) {
-                // no possible path
-                return new ArrayList<>();
-            }
-
-            // aStarNode.node is currentNode
-            AStarNode<T> aStarNode = new AStarNode<>(currentNode);
-
-            totNodes--;
-
-            if (aStarNode.node.getState().equals(goal.getState())) {
-
-                // the path has been found! Calculate the distance
-                List<T> pathToGoal = findPathFromNode(aStarNode);
-
-                reset();
-                return pathToGoal;
-            }
-
-            // not the goal - add all successors to container
-            visitedNodes.add(aStarNode);
-            for (Edge node : aStarNode.node.getNeighbors()) {
-                totNodes++;
-
-                if (!visitedNodes.contains(aStarNode)) {
-                    // if this node hasn't bene visited, add it to the container
-                    aStarNode.parent = lastNode;
-                    container.add(aStarNode.node);
-                    lastNode = aStarNode;
+    private LinkedList<Point2D> pathSearch() {
+        while (!opened.isEmpty()) {
+            ////System.out.println("# in opened: " + opened.size());
+            // Get the node with the lowest F-Cost
+            Node q = null;
+            for (Node n : opened) {
+                ////System.out.println(n.getCurrPos().toString() + " has F: " + n.getF());
+                if (q == null) {
+                    q = n;
+                    ////System.out.println("default node selection: " + q.getCurrPos().toString());
+                } else if (n.getF() <= q.getF()) {
+                    q = n;
+                    ////System.out.println("replaced default with: " + q.getCurrPos().toString());
                 }
             }
+            ////System.out.println("node selected: " + q.getCurrPos().toString());
+            // Remove node from opened list
+            opened.remove(q);
+
+            // Get children of q
+            List<Node> list = q.getChildren();
+            ////System.out.println("child U: " + list.get(0).getCurrPos().toString());
+            ////System.out.println("child D: " + list.get(1).getCurrPos().toString());
+            ////System.out.println("child L: " + list.get(2).getCurrPos().toString());
+            ////System.out.println("child R: " + list.get(3).getCurrPos().toString());
+
+            // For each child,
+            // 1) check is goal,
+            // 2) if child is already on openedList,
+            // 3) if child is already in closedList under different parent and has lower F
+            // 4) check if the point is not an obstacle
+            // 5) check if robot has space to move
+            for (Node n : list) {
+                // Check if node is goal
+                if (n.getCurrPos().equals(end)) {
+                    Node nodeCheck = n;
+                    LinkedList<Point2D> path = new LinkedList<>();
+                    do {
+                        path.addFirst(nodeCheck.getCurrPos());
+                        nodeCheck = nodeCheck.getParent();
+                    } while (nodeCheck != null);
+                    return path;
+                } else if (opened.contains(n) || closed.contains(n) || isMvBox(n.currBox)
+                        || isMvObst(n.currBox) || isStaticObst(n.currBox) || isOutOfBounds(n.currBox)
+                        || n.hasNoRoom()) {
+                    ////System.out.println("node skipped: " + n.getCurrPos().toString());
+                    continue;
+                }
+                ////System.out.println("child: " + n.getCurrPos().toString());
+                ////System.out.println("in closed: " + n.inClosed());
+                ////System.out.println("added to opened: " + n.getCurrPos().toString());
+                opened.add(n);
+            }
+            closed.add(q);
+            ////System.out.println("node added to closed: " + q.getCurrPos().toString());
+            ////System.out.println("# in closed: " + closed.size());
         }
 
-        // no solution
-        reset();
         return null;
     }
 
-    private List<T> findPathFromNode(AStarNode<T> node) {
-        List<T> finalPath = new ArrayList<>();
-        // add this node as the first element
-        finalPath.add(node.node.getState());
-        AStarNode<T> parentNode = node.parent;
-        while (parentNode != null) {
-            finalPath.add(parentNode.node.getState());
-            parentNode = parentNode.parent;
+    private boolean isMvBox(Box currBox) {
+        for (MovingBox mb : mvBox) {
+            if (currBox.getRect().intersects(formatDouble(mb.getRect().getX()), formatDouble(mb.getRect().getY())
+                    , formatDouble(mb.getWidth()), formatDouble(mb.getWidth()))) {
+                // currBox intersects, so discard newNode, start a next random search
+                ////System.out.println("Moving Box at: " + currBox.getPos().toString());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isMvObst(Box currBox) {
+        for (MovingObstacle mo : mvObst) {
+            if (currBox.getRect().intersects(formatDouble(mo.getRect().getX()), formatDouble(mo.getRect().getY())
+                    , formatDouble(mo.getWidth()), formatDouble(mo.getWidth()))) {
+                // currBox intersects, so discard newNode, start a next random search
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isStaticObst(Box currBox) {
+        for (StaticObstacle so : staticObst) {
+            if (currBox.getRect().intersects(formatDouble(so.getRect().getX()), formatDouble(so.getRect().getY())
+                    , formatDouble(so.getRect().getWidth()), formatDouble(so.getRect().getWidth()))) {
+                // currBox intersects, so discard newNode, start a next random search
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isOutOfBounds(Box currBox) {
+        return ((formatDouble(currBox.getRect().getMaxX()) > 1) || (formatDouble(currBox.getRect().getMaxY()) > 1)
+                || (formatDouble(currBox.getRect().getMinX()) < 0) || (formatDouble(currBox.getRect().getMinY()) < 0));
+    }
+
+    public LinkedList<Point2D> getPath() {
+        return path;
+    }
+
+    private double formatDouble(double number) {
+        return Double.parseDouble(DECIMAL.format(number));
+    }
+
+
+
+
+
+
+
+
+
+
+    private class Node {
+        // Class Variables //
+        private Point2D currPos;
+        private Box currBox;
+        private double fCost;
+        private double gCost;
+        private double hCost;
+        private String direction = null; // Only the root node will have null direction
+        private Node parent; // The root node will have null parent
+        private List<Point2D> children = new ArrayList<>();
+
+        // Constructors //
+        private Node(Point2D pos, Node parent) {
+            currPos = pos;
+            currBox = new MovingBox(currPos, width);
+            this.parent = parent;
+            setCosts();
+            setChildren();
         }
 
-        // reverse this list so that we get the parent -> child path
-        Collections.reverse(finalPath);
-        return finalPath;
-    }
-
-    public void reset() {
-        container.clear();
-    }
-
-    public int totNodes() {
-        return totNodes;
-    }
-
-    private class AStarNode<T> {
-        Vertex<T> node;
-        AStarNode<T> parent;
-
-        AStarNode(Vertex<T> node) {
-            this.node = node;
-        }
+        // Methods //
 
         @Override
         public boolean equals(Object o) {
-            if (!(o instanceof AStarNode)) {
-                return false;
+            if (o instanceof Node) {
+                Node n = (Node) o;
+                return n.getCurrPos().equals(currPos);
             }
-            AStarNode other = (AStarNode) o;
-            return node.equals(other.node) && parent.equals(other.parent);
+            return false;
+        }
+
+        private Point2D getCurrPos() {
+            return currPos;
+        }
+
+        private double getF() {
+            return fCost;
+        }
+
+        private double getG() {
+            return gCost;
+        }
+
+        private double getH() {
+            return  hCost;
+        }
+
+        private Node getParent() {
+            return parent;
+        }
+
+        private void setG() {
+            if (parent != null) {
+                gCost = formatDouble(parent.getG() + STEP_SIZE);
+            } else {
+                gCost = 0;
+            }
+        }
+
+        private void setH() {
+            hCost = formatDouble(Math.abs(end.getX() - currPos.getX())
+                    + Math.abs(end.getY() - currPos.getY()));
+        }
+
+        private void setF() {
+            fCost = formatDouble(gCost + hCost);
+        }
+
+        private void setCosts() {
+            setG();
+            setH();
+            setF();
+        }
+
+        private void setChildren() {
+            // order = [u, d, l ,r]
+            Point2D u = new Point2D.Double(currPos.getX()
+                    , formatDouble(currPos.getY() - STEP_SIZE));
+            Point2D d = new Point2D.Double(currPos.getX()
+                    , formatDouble(currPos.getY() + STEP_SIZE));
+            Point2D l = new Point2D.Double(formatDouble(currPos.getX() - STEP_SIZE)
+                    , currPos.getY());
+            Point2D r = new Point2D.Double(formatDouble(currPos.getX() + STEP_SIZE)
+                    , currPos.getY());
+            children.add(u);
+            children.add(d);
+            children.add(l);
+            children.add(r);
+        }
+
+        private List<Node> getChildren() {
+            Node u = new Node(children.get(0), this);
+            u.setDirection("u");
+            Node d = new Node(children.get(1), this);
+            d.setDirection("d");
+            Node l = new Node(children.get(2), this);
+            l.setDirection("l");
+            Node r = new Node(children.get(3), this);
+            r.setDirection("r");
+
+            List<Node> list = new ArrayList<>();
+            list.add(u);
+            list.add(d);
+            list.add(l);
+            list.add(r);
+
+            return list;
+        }
+
+        private void setDirection(String direction) {
+            if (this.direction == null) {
+                this.direction = direction;
+            }
+        }
+
+        private String getDirection() {
+            return direction;
+        }
+
+        @Deprecated
+        private boolean lessFCostInOpened() {
+            for (Node n : opened) {
+                if (this.equals(n) && (n.getF() <= this.fCost)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Deprecated
+        private boolean inClosed() {
+            for (Node n : closed) {
+                if (this.equals(n)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean hasNoRoom() {
+            if (parent.getDirection() == null) {
+                return false;
+            } else if ((parent.getDirection().equals("r") && direction.equals("u"))
+                    || (parent.getDirection().equals("u") && direction.equals("r"))) {
+                Point2D leftBoxPoint = new Point2D.Double((currBox.getRect().getX() - (width / 2))
+                        , currBox.getRect().getCenterY());
+                Point2D downBoxPoint = new Point2D.Double(currBox.getRect().getX()
+                        , (currBox.getRect().getY() + width));
+                Box leftBox = new MovingBox(leftBoxPoint, width);
+                Box downBox = new MovingBox(downBoxPoint, width);
+
+                return (isMvBox(leftBox) || isMvObst(leftBox) || isStaticObst(leftBox) || isOutOfBounds(leftBox)
+                        || isMvBox(downBox) || isMvObst(downBox) || isStaticObst(downBox) || isOutOfBounds(downBox));
+            } else if ((parent.getDirection().equals("r") && direction.equals("d"))
+                    || (parent.getDirection().equals("d") && direction.equals("r"))) {
+                Point2D leftBoxPoint = new Point2D.Double((currBox.getRect().getX() - (width / 2))
+                        , currBox.getRect().getY());
+                Point2D upBoxPoint = new Point2D.Double(currBox.getRect().getX()
+                        , (currBox.getRect().getY() - (width / 2)));
+                Box leftBox = new MovingBox(leftBoxPoint, (width / 2));
+                Box upBox = new MovingBox(upBoxPoint, (width / 2));
+
+                return (isMvBox(leftBox) || isMvObst(leftBox) || isStaticObst(leftBox) || isOutOfBounds(leftBox)
+                        || isMvBox(upBox) || isMvObst(upBox) || isStaticObst(upBox) || isOutOfBounds(upBox));
+            } else if ((parent.getDirection().equals("l") && direction.equals("u"))
+                    || (parent.getDirection().equals("u") && direction.equals("l"))) {
+                Point2D rightBoxPoint = new Point2D.Double((currBox.getRect().getX() + width)
+                        , currBox.getRect().getCenterY());
+                Point2D downBoxPoint = new Point2D.Double(currBox.getRect().getCenterX()
+                        , (currBox.getRect().getY() + width));
+                Box rightBox = new MovingBox(rightBoxPoint, (width / 2));
+                Box downBox = new MovingBox(downBoxPoint, (width / 2));
+
+                return (isMvBox(rightBox) || isMvObst(rightBox) || isStaticObst(rightBox) || isOutOfBounds(rightBox)
+                        || isMvBox(downBox) || isMvObst(downBox) || isStaticObst(downBox) || isOutOfBounds(downBox));
+            } else if ((parent.getDirection().equals("l") && direction.equals("d"))
+                    || (parent.getDirection().equals("d") && direction.equals("l"))) {
+                Point2D rightBoxPoint = new Point2D.Double((currBox.getRect().getX() + width)
+                        , currBox.getRect().getY());
+                Point2D upBoxPoint = new Point2D.Double(currBox.getRect().getCenterX()
+                        , (currBox.getRect().getY() - width));
+                Box rightBox = new MovingBox(rightBoxPoint, (width / 2));
+                Box upBox = new MovingBox(upBoxPoint, (width / 2));
+
+                return (isMvBox(rightBox) || isMvObst(rightBox) || isStaticObst(rightBox) || isOutOfBounds(rightBox)
+                        || isMvBox(upBox) || isMvObst(upBox) || isStaticObst(upBox) || isOutOfBounds(upBox));
+            }
+
+            return false;
+
         }
     }
 }
+
