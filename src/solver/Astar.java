@@ -277,7 +277,7 @@ public class Astar {
             if (currBox.getRect().intersects(formatDouble(mo.getRect().getX()), formatDouble(mo.getRect().getY())
                     , formatDouble(mo.getWidth()), formatDouble(mo.getWidth()))) {
                 // currBox intersects, so discard newNode, start a next random search
-                System.out.println("Moving Obst at: " + currBox.getPos().toString());
+//                System.out.println("Moving Obst at: " + currBox.getPos().toString());
                 return true;
             }
         }
